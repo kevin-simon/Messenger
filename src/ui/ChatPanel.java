@@ -1,0 +1,90 @@
+package ui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.border.Border;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+
+import ui.action.EnterAction;
+import ui.action.SendMessageAction;
+
+public class ChatPanel extends JPanel {
+
+	private static final long serialVersionUID = 1284487099266382368L;
+	private Window window;
+	private JTextField message;
+	private JEditorPane chatRoom;
+	private String previousUser;
+	
+	public ChatPanel(Window window) {
+		super(new BorderLayout());
+		this.chatRoom = new JEditorPane();
+		this.previousUser = "";
+		JPanel panel = new JPanel(new BorderLayout());
+		JScrollPane scrollPane = new JScrollPane(this.chatRoom);
+		scrollPane.setBorder(null);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setPreferredSize(new Dimension(200, 300));
+		panel.add(scrollPane, BorderLayout.CENTER);
+		this.window = window;
+		this.setBackground(new Color(220,220,220));
+		this.chatRoom.setBackground(Color.WHITE);
+		this.chatRoom.setEditable(false);
+		this.chatRoom.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+		this.add(panel, BorderLayout.CENTER);
+		JPanel sendText = new JPanel(new BorderLayout());
+		this.message = new JTextField();
+		sendText.add(this.message, BorderLayout.CENTER);
+		JButton send = new JButton("Send");
+		send.addActionListener(new SendMessageAction(this.window, this));
+		Border outside = BorderFactory.createLineBorder(new Color(200,200,200));
+		Border inside = BorderFactory.createEmptyBorder(3,6,3,6);
+		Border in = BorderFactory.createCompoundBorder(outside, inside);
+		Border out = BorderFactory.createMatteBorder(1,10,1,1,new Color(220,220,220));
+		this.message.addKeyListener(new EnterAction(send));
+		this.message.setBorder(BorderFactory.createLineBorder(new Color(200,200,200)));
+		send.setBorder(BorderFactory.createCompoundBorder(out, in));
+		sendText.add(send, BorderLayout.LINE_END);
+		sendText.setBackground(new Color(220,220,220));
+		sendText.setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
+		this.add(sendText, BorderLayout.PAGE_END);
+		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 5));
+	}
+	
+	public String getMessage() {
+		String message = this.message.getText();
+		this.message.setText("");
+		return message;
+	}
+	
+	public void showMessage(String user, String message) {
+		String texte = "";
+		if (!this.previousUser.equals(user) && !this.previousUser.equals("")) {
+			texte += "--------------------\n";
+		}
+		texte += "(00:00) " + user + "\n";
+		texte += message;
+		Document doc = this.chatRoom.getDocument();
+		try {
+			doc.insertString(doc.getLength(), texte, null);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		this.previousUser = user;
+	}
+	
+	public void giveFocus() {
+		this.message.requestFocusInWindow();
+		this.message.requestFocus(true);
+	}
+	
+}
