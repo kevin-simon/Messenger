@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,7 +33,10 @@ public class Window extends JFrame {
 		super();
 		this.setWindowSize("800x600");
 		this.setTitle(windowsTitle);
-		this.setIconImage(ResourceManager.getImage("icon.png").getImage());
+		ImageIcon icone = ResourceManager.getImage("icon.png");
+		if (icone != null) {
+			this.setIconImage(icone.getImage());
+		}
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAction(this));
 		this.setMinimumSize(new Dimension(this.width, this.height));
@@ -48,6 +52,8 @@ public class Window extends JFrame {
 		//this.loadConnection();
 		this.loadMessenger("moi");
 	}
+	
+	
 	
 	public JPanel mainPanel() {
 		return this.main;

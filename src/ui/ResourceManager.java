@@ -18,19 +18,23 @@ public class ResourceManager {
 	public ResourceManager() {}
 	
 	public static ImageIcon getImage(String imageName) {
-		String path = "resources/images/" + imageName;
+		ImageIcon icone = null;
+		String path = "/resources/images/" + imageName;
 		URL imageUrl = ResourceManager.class.getResource(path);
 		if (imageUrl == null) {
 			System.err.println(imageName + " not found");
 		}
-		return new ImageIcon(imageUrl);
+		else {
+			icone = new ImageIcon(imageUrl);
+		}
+		return icone;
 	}
 	
 	public static String getLocationFile(String language) {
-		return ResourceManager.class.getResource("resources/locations/" + language + ".txt").getPath();
+		return ResourceManager.class.getResource("/resources/locations/" + language + ".txt").getPath();
 	}
 	
 	public static String getPropertiesFile(String properties) {
-		return ResourceManager.class.getResource("resources/properties/" + properties + ".conf").getPath();
+		return ResourceManager.class.getResource("/resources/properties/" + properties + ".conf").getPath();
 	}
 }
