@@ -9,6 +9,8 @@ import ui.ResourceManager;
 public class Properties extends java.util.Properties {
 	
 	private static final long serialVersionUID = -7870781872648363984L;
+	
+	public static Properties APP = new Properties("app");
 	public static Properties UI = new Properties("ui");
 	
 	public Properties(String properties) {
