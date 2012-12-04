@@ -38,7 +38,7 @@ public class Server {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Serveur lanc�");
+		System.out.println("Serveur lance");
 	}
 	
 	public boolean isRunning() {
@@ -56,6 +56,6 @@ public class Server {
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Serveur arr�t�");
+		System.out.println("Serveur arrete");
 	}
 }

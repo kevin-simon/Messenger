@@ -18,11 +18,9 @@ import rmi.Type;
 public class Discover extends Observable implements Runnable {
 	
 	private HashMap<InetAddress, BroadcastAddress> broadcastAddresses;
-	private ArrayList<BroadcastObject> sendedObjects;
 
 	public Discover() {
 		this.broadcastAddresses = new HashMap<InetAddress,BroadcastAddress>();
-		this.sendedObjects = new ArrayList<BroadcastObject>();
 		try {
 			Enumeration<NetworkInterface> networInterfaces = NetworkInterface.getNetworkInterfaces();
 			while (networInterfaces.hasMoreElements()) {
@@ -40,6 +38,10 @@ public class Discover extends Observable implements Runnable {
 		}
 	}
 	
+	public ArrayList<InetAddress> getLocalAddresses() {
+		return new ArrayList<InetAddress>(this.broadcastAddresses.keySet());
+	}
+	
 	public void start() {
 		new Thread(this).start();
 	}
@@ -53,11 +55,7 @@ public class Discover extends Observable implements Runnable {
 		    	
 		    	ByteArrayOutputStream  baos = new ByteArrayOutputStream();
 		        ObjectOutputStream oos = new ObjectOutputStream(baos);
-		        BroadcastObject broadcastObject = new BroadcastObject();
-		        broadcastObject.source = inetAddress;
-		        broadcastObject.sourceType = peerType;
-		        this.sendedObjects.add(broadcastObject);
-		        oos.writeObject(broadcastObject);
+		        oos.writeObject(inetAddress);
 		        oos.flush();
 		        
 		    	InetAddress address = InetAddress.getByName(this.broadcastAddresses.get(inetAddress).toString());

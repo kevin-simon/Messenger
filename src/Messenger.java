@@ -1,39 +1,60 @@
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
 import org.lightcouch.CouchDbClient;
 
+import rmi.Client;
+import rmi.Server;
 import rmi.Type;
-import utils.BroadcastObject;
+import rmi.interfaces.Connection;
+import rmi.interfaces.IConnection;
 import utils.Discover;
 import utils.Properties;
 
 import com.google.gson.JsonObject;
 
-public class Messenger implements Observer {
+public class Messenger extends Server implements Observer {
 	
 	private static Messenger instance;
 	private Type peerType;
 	
+	private ArrayList<Client<IConnection>> managedPeers;
+	
 	public static Messenger getInstance() {
 		if (Messenger.instance == null) {
-			Messenger.instance = new Messenger();
+			try {
+				Messenger.instance = new Messenger();
+			} catch (NumberFormatException | UnknownHostException e) {
+				e.printStackTrace();
+			}
 		}
 		return Messenger.instance;
 	}
 	
-	public Messenger() {
+	public Messenger() throws NumberFormatException, UnknownHostException {
+		super("Messenger", "192.168.2.1", Integer.parseInt(Properties.APP.get("rmi_port")));
+		this.peerType = Type.PEER;
+	}
+	
+	public void upgrade() {
 		this.peerType = Type.SUPER_PEER;
+		this.managedPeers = new ArrayList<Client<IConnection>>();
 	}
 
 	public static void main(String[] args) throws Exception {
 		Messenger messenger = Messenger.getInstance();
+		messenger.upgrade();
+		messenger.start(new Connection(messenger.peerType));
 		//messenger.subscribe();
-		//new Window("Messenger");*/
 		Discover discover = new Discover();
 		discover.addObserver(messenger);
 		discover.start();
 		discover.sendPacket(messenger.getPeerType());
+		//new Window("Messenger");
 	}
 	
 	public Type getPeerType() {
@@ -53,10 +74,19 @@ public class Messenger implements Observer {
 
 	@Override
 	public void update(Observable o, Object object) {
-		if (o instanceof Discover && object instanceof BroadcastObject) {
-			BroadcastObject broadcastObject = (BroadcastObject) object;
-			if (broadcastObject.sourceType == Type.PEER && this.peerType == Type.SUPER_PEER) {
-				
+		if (o instanceof Discover && object instanceof InetAddress) {
+			InetAddress clientAddress = ((InetAddress) object);
+			boolean isLocalClient = ((Discover) o).getLocalAddresses().contains(clientAddress);
+			if (this.peerType == Type.SUPER_PEER && !isLocalClient) {
+				System.out.println("Demande d'accès d'un pair");
+				try {
+					Client<IConnection> client = new Client<IConnection>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+					this.managedPeers.add(client);
+					System.out.println(((IConnection) client.getObject()).getPeerType());
+				} catch (NumberFormatException | RemoteException e) {
+					e.printStackTrace();
+				}
+				System.out.println("Connexion au pair via le protocole RMI");
 			}
 			System.out.println(object);
 		}
