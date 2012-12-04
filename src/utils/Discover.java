@@ -8,7 +8,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -87,15 +86,12 @@ public class Discover extends Observable implements Runnable {
 	}
 	
 	public void run() {
-		int timeout = Integer.parseInt(Properties.APP.get("broadcast_timeout"));
-		long time = System.currentTimeMillis();
-		while (System.currentTimeMillis() - time < timeout*1000) {
+		while (true) {
 			try {
 				int broadcastPort = Integer.parseInt(Properties.APP.get("broadcast_port"));
 				
 				DatagramSocket socket = new DatagramSocket(broadcastPort);
-				socket.setSoTimeout(timeout*1000);
-			    byte[] data = new byte[4];
+				 byte[] data = new byte[4];
 			    DatagramPacket packet = new DatagramPacket(data, data.length );
 			    socket.receive(packet);
 	
@@ -113,9 +109,6 @@ public class Discover extends Observable implements Runnable {
 			    this.setChanged();
 			    this.notifyObservers(oos.readObject());
 			    socket.close();
-			} catch(SocketTimeoutException ex) {
-				System.out.println("Timeout -> continue");
-				break;
 			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
