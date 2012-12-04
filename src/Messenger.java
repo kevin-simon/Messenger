@@ -1,18 +1,19 @@
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.lightcouch.CouchDbClient;
 
 import rmi.Type;
+import utils.BroadcastObject;
+import utils.Discover;
 import utils.Properties;
 
 import com.google.gson.JsonObject;
 
-public class Messenger {
+public class Messenger implements Observer {
 	
 	private static Messenger instance;
-	private static Type peerType;
+	private Type peerType;
 	
 	public static Messenger getInstance() {
 		if (Messenger.instance == null) {
@@ -22,52 +23,21 @@ public class Messenger {
 	}
 	
 	public Messenger() {
-		this.peerType = Type.PEER;
+		this.peerType = Type.SUPER_PEER;
 	}
 
 	public static void main(String[] args) throws Exception {
-		/*Messenger messenger = Messenger.getInstance();
-		messenger.subscribe();
+		Messenger messenger = Messenger.getInstance();
+		//messenger.subscribe();
 		//new Window("Messenger");*/
-		
-		String Broadcastaddress = new String("192.168.1.255");
-	    int port = 2000;
-	    DatagramSocket serverSocket = new DatagramSocket();
-	    serverSocket.setBroadcast(true);
-	    InetAddress IPAddress = InetAddress.getByName(Broadcastaddress);
-	    System.out.println("Sending Discovery message to " + IPAddress + " Via UDP port " + port);
-
-	    byte[] sendData = new byte[4];
-	    sendData[0] = 'F';
-	    sendData[1] = 'I';
-	    sendData[2] = 'N';
-	    sendData[3] = 'D';
-
-	    DatagramPacket sendPacket = new DatagramPacket(sendData,sendData.length,IPAddress,port);
-
-	    int i = 0;
-	    new Thread() {
-	        public void run() {
-	     
-	            try {
-	                int port = 2000;
-	                DatagramSocket dsocket = new DatagramSocket(port);
-	                byte[] buffer = new byte[2048];
-	     
-	                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-	                dsocket.receive(packet);
-	                System.out.println("Receiving...");
-	                String msg = new String(buffer, 0, packet.getLength());
-	                System.out.println(packet.getAddress().getHostAddress() + " : " + msg);
-	                packet.setLength(buffer.length);
-	                dsocket.close();
-	            } catch (Exception e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    }.start();
-	    serverSocket.send(sendPacket);
-	    System.out.println("Packet sent");
+		Discover discover = new Discover();
+		discover.addObserver(messenger);
+		discover.start();
+		discover.sendPacket(messenger.getPeerType());
+	}
+	
+	public Type getPeerType() {
+		return this.peerType;
 	}
 	
 	public void subscribe() {
@@ -79,6 +49,17 @@ public class Messenger {
 		JsonObject json = dbClient.find(JsonObject.class, "peers");
 		System.out.println(json);
 		
+	}
+
+	@Override
+	public void update(Observable o, Object object) {
+		if (o instanceof Discover && object instanceof BroadcastObject) {
+			BroadcastObject broadcastObject = (BroadcastObject) object;
+			if (broadcastObject.sourceType == Type.PEER && this.peerType == Type.SUPER_PEER) {
+				
+			}
+			System.out.println(object);
+		}
 	}
 
 }
