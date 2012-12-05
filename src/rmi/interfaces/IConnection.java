@@ -1,11 +1,11 @@
 package rmi.interfaces;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.rmi.Remote;
-
-import rmi.Type;
+import java.util.ArrayList;
 
 public interface IConnection extends Remote, Serializable {
 
-	public Type getPeerType();
+	public void sendConnectionInformations(ArrayList<InetAddress> inetAddress);
 }

@@ -48,7 +48,7 @@ public class Messenger implements Observer {
 		for (InetAddress address : addresses) {
 			System.out.println(address);
 			Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-			server.start(new Connection(this.peerType));
+			server.start(new Connection());
 			this.rmiServers.add(server);
 		}
 	}
@@ -73,13 +73,16 @@ public class Messenger implements Observer {
 	public void update(Observable o, Object object) {
 		if (o instanceof Discover && object instanceof InetAddress) {
 			InetAddress clientAddress = ((InetAddress) object);
-			boolean isLocalClient = ((Discover) o).getLocalAddresses().contains(clientAddress);
-			if (this.peerType == Type.SUPER_PEER && !isLocalClient) {
+			ArrayList<InetAddress> localAddresses = ((Discover) o).getLocalAddresses();
+			if (this.peerType == Type.SUPER_PEER && !localAddresses.contains(clientAddress)) {
 				System.out.println("Demande d'acces d'un pair");
 				try {
+					if (this.managedPeers.containsKey(clientAddress.getHostAddress())) {
+						System.out.println("Already started");
+					}
 					Client<IConnection> client = new Client<IConnection>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 					this.managedPeers.put(clientAddress.getHostAddress(), client);
-					System.out.println(((IConnection) client.getObject()).getPeerType());
+					((IConnection) client.getObject()).sendConnectionInformations(localAddresses);
 				} catch (NumberFormatException | RemoteException e) {
 					e.printStackTrace();
 				}

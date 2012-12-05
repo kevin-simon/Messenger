@@ -1,20 +1,21 @@
 package rmi.interfaces;
 
-import rmi.Type;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Observable;
 
-public class Connection implements IConnection {
+public class Connection extends Observable implements IConnection {
 
 	private static final long serialVersionUID = -5106772794510276705L;
+	
+	public Connection() {}
 
-	private Type type;
-	
-	public Connection(Type type) {
-		this.type = type;
-	}
-	
 	@Override
-	public Type getPeerType() {
-		return this.type;
+	public void sendConnectionInformations(ArrayList<InetAddress> inetAddresses) {
+		this.setChanged();
+		this.notifyObservers(inetAddresses);
+		for (InetAddress address : inetAddresses)
+			System.out.println(address);
 	}
 
 }
