@@ -110,7 +110,10 @@ public class Messenger implements Observer {
 						System.out.println(clientAddress);
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.peers.put(clientAddress.getHostAddress(), client);
-						((IPeer) client.getRemoteObject()).connectTo(localAddresses);
+						System.out.println(client.getRemoteObject());
+						IPeer peer = ((IPeer) client.getRemoteObject());
+						System.out.println(peer);
+						peer.connectTo(localAddresses);
 					}
 					System.out.println("Connexion au pair " + clientAddress.getHostAddress() + " via le protocole RMI");
 				} catch (NumberFormatException | RemoteException e) {
