@@ -18,7 +18,7 @@ public class Client<T extends Remote> extends UnicastRemoteObject {
 	}
 
 	@SuppressWarnings("unchecked")
-	public T getObject() {
+	public T getRemoteObject() {
 		T remote = null;
 		try {
 			remote = (T) Naming.lookup(this.serverUrl);

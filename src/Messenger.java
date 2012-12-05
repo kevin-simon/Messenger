@@ -74,6 +74,7 @@ public class Messenger implements Observer {
 	
 	@Override
 	public void update(Observable o, Object object) {
+		System.out.println(o);
 		if (o instanceof Discover && object instanceof InetAddress) {
 			InetAddress clientAddress = ((InetAddress) object);
 			ArrayList<InetAddress> localAddresses = ((Discover) o).getLocalAddresses();
@@ -85,11 +86,11 @@ public class Messenger implements Observer {
 					}
 					Client<IConnection> client = new Client<IConnection>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 					this.managedPeers.put(clientAddress.getHostAddress(), client);
-					((IConnection) client.getObject()).sendConnectionInformations(localAddresses);
+					((IConnection) client.getRemoteObject()).sendConnectionInformations(localAddresses);
+					System.out.println("Connexion au pair via le protocole RMI");
 				} catch (NumberFormatException | RemoteException e) {
 					e.printStackTrace();
 				}
-				System.out.println("Connexion au pair via le protocole RMI");
 			}
 		}
 		else if (o instanceof Connection && object instanceof InetAddress) {
@@ -111,6 +112,7 @@ public class Messenger implements Observer {
 				System.out.println(superPeer);
 			}
 		}
+		System.out.println(object);
 	}
 
 }
