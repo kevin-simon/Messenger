@@ -20,7 +20,7 @@ public class Messenger implements Observer {
 	private Type peerType;
 	
 	private ArrayList<Server> rmiServers;
-	
+	private HashMap<String, Client<IConnection>> superPeers;
 	private HashMap<String, Client<IConnection>> managedPeers;
 	
 	public static Messenger getInstance() {
@@ -35,6 +35,7 @@ public class Messenger implements Observer {
 	}
 	
 	public Messenger() throws NumberFormatException, UnknownHostException {
+		this.superPeers = new HashMap<String, Client<IConnection>>();
 		this.rmiServers = new ArrayList<Server>();
 		this.peerType = Type.PEER;
 	}
@@ -48,7 +49,9 @@ public class Messenger implements Observer {
 		for (InetAddress address : addresses) {
 			System.out.println(address);
 			Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-			server.start(new Connection());
+			Connection connection = new Connection(addresses);
+			connection.addObserver(this);
+			server.start(connection);
 			this.rmiServers.add(server);
 		}
 	}
@@ -88,7 +91,25 @@ public class Messenger implements Observer {
 				}
 				System.out.println("Connexion au pair via le protocole RMI");
 			}
-			System.out.println(object);
+		}
+		else if (o instanceof Connection && object instanceof InetAddress) {
+			InetAddress serverAddress = ((InetAddress) object);
+			ArrayList<InetAddress> localAddresses = ((Discover) o).getLocalAddresses();
+			if (!localAddresses.contains(serverAddress)) {
+				System.out.println("Retour de connexion du super pair");
+				try {
+					if (this.superPeers.containsKey(serverAddress.getHostAddress())) {
+						System.out.println("Already started");
+					}
+					Client<IConnection> client = new Client<IConnection>("Messenger", serverAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+					this.superPeers.put(serverAddress.getHostAddress(), client);
+				} catch (NumberFormatException | RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+			for (String superPeer : this.superPeers.keySet()) {
+				System.out.println(superPeer);
+			}
 		}
 	}
 
