@@ -48,7 +48,7 @@ public class Messenger implements Observer {
 		for (InetAddress address : addresses) {
 			System.out.println(address);
 			Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-			server.start(new Connection());
+			server.start(new Connection(addresses));
 			this.rmiServers.add(server);
 		}
 	}

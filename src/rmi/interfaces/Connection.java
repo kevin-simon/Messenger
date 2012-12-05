@@ -8,10 +8,15 @@ public class Connection extends Observable implements IConnection {
 
 	private static final long serialVersionUID = -5106772794510276705L;
 	
-	public Connection() {}
+	private ArrayList<InetAddress> inetAddresses;
+	
+	public Connection(ArrayList<InetAddress> inetAddresses) {
+		this.inetAddresses = inetAddresses;
+	}
 
 	@Override
 	public void sendConnectionInformations(ArrayList<InetAddress> inetAddresses) {
+		System.out.println(this.inetAddresses);
 		this.setChanged();
 		this.notifyObservers(inetAddresses);
 		for (InetAddress address : inetAddresses)
