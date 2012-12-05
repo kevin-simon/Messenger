@@ -18,6 +18,7 @@ import rmi.Type;
 public class Discover extends Observable implements Runnable {
 	
 	private HashMap<InetAddress, BroadcastAddress> broadcastAddresses;
+	private InetAddress broadcastSender;
 
 	public Discover() {
 		this.broadcastAddresses = new HashMap<InetAddress,BroadcastAddress>();
@@ -55,7 +56,7 @@ public class Discover extends Observable implements Runnable {
 		    	
 		    	ByteArrayOutputStream  baos = new ByteArrayOutputStream();
 		        ObjectOutputStream oos = new ObjectOutputStream(baos);
-		        oos.writeObject(inetAddress);
+		        oos.writeObject(peerType);
 		        oos.flush();
 		        
 		    	InetAddress address = InetAddress.getByName(this.broadcastAddresses.get(inetAddress).toString());
@@ -81,6 +82,10 @@ public class Discover extends Observable implements Runnable {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+	
+	public InetAddress getBroadcastSender() {
+		return this.broadcastSender;
 	}
 	
 	public void run() {

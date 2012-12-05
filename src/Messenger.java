@@ -10,6 +10,7 @@ import rmi.Client;
 import rmi.Server;
 import rmi.Type;
 import rmi.interfaces.IPeer;
+import rmi.interfaces.ISuperPeer;
 import rmi.interfaces.Peer;
 import rmi.interfaces.SuperPeer;
 import utils.Discover;
@@ -22,6 +23,7 @@ public class Messenger implements Observer {
 	
 	private ArrayList<Server> servers;
 	private HashMap<String, Client<IPeer>> peers;
+	private HashMap<String, Client<ISuperPeer>> superPeers;
 	
 	public static Messenger getInstance() {
 		if (Messenger.instance == null) {
@@ -35,13 +37,14 @@ public class Messenger implements Observer {
 	}
 	
 	public Messenger() throws NumberFormatException, UnknownHostException {
-		this.peers = new HashMap<String, Client<IPeer>>();
+		this.superPeers = new HashMap<String, Client<ISuperPeer>>();
 		this.servers = new ArrayList<Server>();
 		this.peerType = Type.PEER;
 	}
 	
 	public void upgrade() {
 		this.peerType = Type.SUPER_PEER;
+		this.peers = new HashMap<String, Client<IPeer>>();
 	}
 	
 	public void startServers(ArrayList<InetAddress> addresses) {
@@ -84,20 +87,33 @@ public class Messenger implements Observer {
 	
 	@Override
 	public void update(Observable o, Object object) {
-		System.out.println(o);
-		if (o instanceof Discover && object instanceof InetAddress) {
-			InetAddress clientAddress = ((InetAddress) object);
+		if (o instanceof Discover && object instanceof Type) {
+			Type clientType = ((Type) object);
+			InetAddress clientAddress = ((Discover) o).getBroadcastSender();
 			ArrayList<InetAddress> localAddresses = ((Discover) o).getLocalAddresses();
-			if (this.peerType == Type.SUPER_PEER && !localAddresses.contains(clientAddress)) {
+			boolean isLocalAddress = false;
+			for (InetAddress localAddress : localAddresses) {
+				if (localAddress.getHostAddress().equals(clientAddress)) {
+					isLocalAddress = true;
+				}
+			}
+			if (this.peerType == Type.SUPER_PEER && !isLocalAddress) {
 				System.out.println("Demande d'acces d'un pair");
 				try {
 					if (this.peers.containsKey(clientAddress.getHostAddress())) {
 						System.out.println("Already started");
 					}
-					Client<IPeer> client = new Client<IPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-					this.peers.put(clientAddress.getHostAddress(), client);
-					((IPeer) client.getRemoteObject()).connectTo(localAddresses);
-					System.out.println("Connexion au pair via le protocole RMI");
+					if (clientType == Type.SUPER_PEER) {
+						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+						this.superPeers.put(clientAddress.getHostAddress(), client);
+						((ISuperPeer) client.getRemoteObject()).connectTo(localAddresses);
+					}
+					else if (clientType == Type.PEER) {
+						Client<IPeer> client = new Client<IPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+						this.peers.put(clientAddress.getHostAddress(), client);
+						((IPeer) client.getRemoteObject()).connectTo(localAddresses);
+					}
+					System.out.println("Connexion au pair " + clientAddress.getHostAddress() + " via le protocole RMI");
 				} catch (NumberFormatException | RemoteException e) {
 					e.printStackTrace();
 				}
