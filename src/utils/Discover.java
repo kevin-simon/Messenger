@@ -97,7 +97,7 @@ public class Discover extends Observable implements Runnable {
 				 byte[] data = new byte[4];
 			    DatagramPacket packet = new DatagramPacket(data, data.length );
 			    socket.receive(packet);
-	
+			    System.out.println("Reception d'un packet broadcaste depuis " + packet.getAddress());
 			    int len = 0;
 			    for (int i = 0; i < 4; ++i) {
 			    	len |= (data[3-i] & 0xff) << (i << 3);
