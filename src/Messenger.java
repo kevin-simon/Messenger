@@ -43,6 +43,7 @@ public class Messenger implements Observer {
 	}
 	
 	public void upgrade() {
+		System.out.println("Mode Super-pair active !");
 		this.peerType = Type.SUPER_PEER;
 		this.peers = new HashMap<String, Client<IPeer>>();
 	}
@@ -93,16 +94,13 @@ public class Messenger implements Observer {
 			ArrayList<InetAddress> localAddresses = ((Discover) o).getLocalAddresses();
 			boolean isLocalAddress = false;
 			for (InetAddress localAddress : localAddresses) {
-				if (localAddress.getHostAddress().equals(clientAddress)) {
+				if (localAddress.getHostAddress().equals(clientAddress.getHostAddress())) {
 					isLocalAddress = true;
 				}
 			}
 			if (this.peerType == Type.SUPER_PEER && !isLocalAddress) {
 				System.out.println("Demande d'acces d'un pair");
 				try {
-					if (this.peers.containsKey(clientAddress.getHostAddress())) {
-						System.out.println("Already started");
-					}
 					if (clientType == Type.SUPER_PEER) {
 						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.superPeers.put(clientAddress.getHostAddress(), client);

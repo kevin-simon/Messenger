@@ -106,12 +106,13 @@ public class Discover extends Observable implements Runnable {
 			    byte[] buffer = new byte[len];
 			    packet = new DatagramPacket(buffer, buffer.length );
 			    socket.receive(packet);
-	
+			    this.broadcastSender = packet.getAddress();
 			    ByteArrayInputStream baos = new ByteArrayInputStream(buffer);
 			    ObjectInputStream oos = new ObjectInputStream(baos);
-			    this.setChanged();
-			    this.notifyObservers(oos.readObject());
+			    Type type = (Type) oos.readObject();
 			    socket.close();
+			    this.setChanged();
+			    this.notifyObservers(type);
 			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
