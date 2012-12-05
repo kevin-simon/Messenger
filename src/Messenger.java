@@ -74,7 +74,7 @@ public class Messenger implements Observer {
 		Discover discover = new Discover();
 		
 		Messenger messenger = Messenger.getInstance();
-		messenger.upgrade();
+		//messenger.upgrade();
 		messenger.startServers(discover.getLocalAddresses());
 		discover.addObserver(messenger);
 		discover.start();
@@ -99,7 +99,7 @@ public class Messenger implements Observer {
 				}
 			}
 			if (this.peerType == Type.SUPER_PEER && !isLocalAddress) {
-				System.out.println("Demande d'acces d'un pair");
+				System.out.println("Demande d'acces d'un pair de type " + clientType);
 				try {
 					if (clientType == Type.SUPER_PEER) {
 						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
@@ -109,7 +109,10 @@ public class Messenger implements Observer {
 					else if (clientType == Type.PEER) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.peers.put(clientAddress.getHostAddress(), client);
-						((IPeer) client.getRemoteObject()).connectTo(localAddresses);
+						System.out.println(client.getRemoteObject());
+						IPeer peer = ((IPeer) client.getRemoteObject());
+						System.out.println(peer);
+						peer.connectTo(localAddresses);
 					}
 					System.out.println("Connexion au pair " + clientAddress.getHostAddress() + " via le protocole RMI");
 				} catch (NumberFormatException | RemoteException e) {
