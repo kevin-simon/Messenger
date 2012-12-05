@@ -13,6 +13,7 @@ public class Server {
 	
 	private String url;
 	private boolean running;
+	private Remote sharedObject;
 
 	public Server(String name, int port) throws UnknownHostException {
 		this(name, InetAddress.getLocalHost().getHostAddress(), port);
@@ -28,10 +29,15 @@ public class Server {
 		this.url = "rmi://" + host + ":" + port + "/" + name;
 	}
 	
+	public Remote getSharedObject() {
+		return this.sharedObject;
+	}
+	
 	public void start(Remote object) {
 		System.out.println("Enregistrement de l'objet avec l'url : " + this.url);
 		try {
 			Naming.rebind(this.url, object);
+			this.sharedObject = object;
 			this.running = true;
 		} catch (RemoteException e) {
 			e.printStackTrace();
