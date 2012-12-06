@@ -120,6 +120,7 @@ public class Messenger implements Observer {
 						if (!((IPeer) this.servers.get(address).getSharedObject()).hasSuperPeers()) {
 							this.upgrade();
 							this.servers.get(address).stop();
+							Thread.sleep(1000);
 							Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 							SuperPeer superPeer = new SuperPeer(address);
 							superPeer.addObserver(this);
@@ -127,6 +128,8 @@ public class Messenger implements Observer {
 							this.servers.put(serversAddresses.get(i), server);
 						}
 					} catch (RemoteException e) {
+						e.printStackTrace();
+					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
