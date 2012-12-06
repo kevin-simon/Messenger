@@ -11,10 +11,16 @@ public class Client<T extends Remote> extends UnicastRemoteObject {
 	
 	private static final long serialVersionUID = -7089419078265136378L;
 	
+	private String hostAddress;
 	private String serverUrl;
 
-	public Client(String name, String host, int port) throws RemoteException {
-		this.serverUrl = "rmi://" + host + ":" + port + "/" + name;
+	public Client(String name, String hostAddress, int port) throws RemoteException {
+		this.hostAddress = hostAddress;
+		this.serverUrl = "rmi://" + hostAddress + ":" + port + "/" + name;
+	}
+	
+	public String getHostAddress() {
+		return this.hostAddress;
 	}
 
 	@SuppressWarnings("unchecked")

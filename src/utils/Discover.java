@@ -7,60 +7,77 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Observable;
 
 import rmi.Type;
+import datas.Identity;
 
 public class Discover extends Observable implements Runnable {
 	
-	private HashMap<InetAddress, BroadcastAddress> broadcastAddresses;
+	private HashMap<String, InetAddress> broadcastAddresses;
+	private HashMap<String, InetAddress> localAddresses;
 	private InetAddress broadcastSender;
 
 	public Discover() {
-		this.broadcastAddresses = new HashMap<InetAddress,BroadcastAddress>();
+		this.broadcastAddresses = new HashMap<String,InetAddress>();
+		this.localAddresses = new HashMap<String,InetAddress>();
 		try {
-			Enumeration<NetworkInterface> networInterfaces = NetworkInterface.getNetworkInterfaces();
-			while (networInterfaces.hasMoreElements()) {
-				NetworkInterface networkInterface = networInterfaces.nextElement();
-				Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-				while (addresses.hasMoreElements()) {
-					InetAddress address = addresses.nextElement();
-					if (!address.isLoopbackAddress() && address.getAddress().length == 4) {
-						this.broadcastAddresses.put(address, new BroadcastAddress(address));
+			Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+			while (networkInterfaces.hasMoreElements()) {
+				NetworkInterface networkInterface = networkInterfaces.nextElement();
+				List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
+				for (InterfaceAddress interfaceAddress : interfaceAddresses) {
+					InetAddress broadcastAddress;
+					this.localAddresses.put(networkInterface.getName(), interfaceAddress.getAddress());
+					if ((broadcastAddress = interfaceAddress.getBroadcast()) != null) {
+						this.broadcastAddresses.put(networkInterface.getName(), broadcastAddress);
 					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println(this.localAddresses);
+		System.out.println(this.broadcastAddresses);
+	}
+	
+	public boolean isLocalAddress(InetAddress inetAddress) {
+		for (InetAddress localAddress : this.localAddresses.values()) {
+			if (localAddress.getHostAddress().equals(inetAddress.getHostAddress())) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public ArrayList<InetAddress> getLocalAddresses() {
-		return new ArrayList<InetAddress>(this.broadcastAddresses.keySet());
+		return new ArrayList<InetAddress>(this.localAddresses.values());
 	}
 	
 	public void start() {
 		new Thread(this).start();
 	}
 	
-	public void sendPacket(Type peerType) {
+	public void sendPacket(String pseudonyme, Type peerType) {
 		try {
 			int broadcastPort = Integer.parseInt(Properties.APP.get("broadcast_port"));
 			DatagramSocket serverSocket = new DatagramSocket();
 		    serverSocket.setBroadcast(true);
-		    for (InetAddress inetAddress : this.broadcastAddresses.keySet()) {
-		    	
+		    for (String networkInterface : this.broadcastAddresses.keySet()) {
+		    	InetAddress broadcastAddress = this.broadcastAddresses.get(networkInterface);
+		    	InetAddress localAddress = this.localAddresses.get(networkInterface);
 		    	ByteArrayOutputStream  baos = new ByteArrayOutputStream();
 		        ObjectOutputStream oos = new ObjectOutputStream(baos);
-		        oos.writeObject(peerType);
+		        oos.writeObject(new Identity(pseudonyme, localAddress, peerType));
 		        oos.flush();
 		        
-		    	InetAddress address = InetAddress.getByName(this.broadcastAddresses.get(inetAddress).toString());
-		    	System.out.println("Sending Discovery message to " + address + " Via UDP port " + broadcastPort);
+		    	System.out.println("Sending Discovery message to " + broadcastAddress + " Via UDP port " + broadcastPort);
 	
 		    	byte[] buffer = baos.toByteArray();
 	
@@ -72,10 +89,10 @@ public class Discover extends Observable implements Runnable {
 		            data[3-i] = (byte)((number & (0xff << shift)) >>> shift);
 		        }
 		        
-		        DatagramPacket packet = new DatagramPacket(data, 4, address, broadcastPort);
+		        DatagramPacket packet = new DatagramPacket(data, 4, broadcastAddress, broadcastPort);
 		        serverSocket.send(packet);
 	
-		        packet = new DatagramPacket(buffer, buffer.length, address, broadcastPort);
+		        packet = new DatagramPacket(buffer, buffer.length, broadcastAddress, broadcastPort);
 		        serverSocket.send(packet);
 		    }
 		    serverSocket.close();
@@ -97,22 +114,23 @@ public class Discover extends Observable implements Runnable {
 				 byte[] data = new byte[4];
 			    DatagramPacket packet = new DatagramPacket(data, data.length );
 			    socket.receive(packet);
-			    System.out.println("Reception d'un packet broadcaste depuis " + packet.getAddress());
-			    int len = 0;
-			    for (int i = 0; i < 4; ++i) {
-			    	len |= (data[3-i] & 0xff) << (i << 3);
+				if (!this.localAddresses.values().contains(packet.getAddress())) {
+				    System.out.println("Reception d'un packet broadcaste depuis " + packet.getAddress());
+				    int len = 0;
+				    for (int i = 0; i < 4; ++i) {
+				    	len |= (data[3-i] & 0xff) << (i << 3);
+				    }
+		
+				    byte[] buffer = new byte[len];
+				    packet = new DatagramPacket(buffer, buffer.length );
+				    socket.receive(packet);
+				    this.broadcastSender = packet.getAddress();
+				    ByteArrayInputStream baos = new ByteArrayInputStream(buffer);
+				    ObjectInputStream oos = new ObjectInputStream(baos);
+				    this.setChanged();
+				    this.notifyObservers(oos.readObject());
 			    }
-	
-			    byte[] buffer = new byte[len];
-			    packet = new DatagramPacket(buffer, buffer.length );
-			    socket.receive(packet);
-			    this.broadcastSender = packet.getAddress();
-			    ByteArrayInputStream baos = new ByteArrayInputStream(buffer);
-			    ObjectInputStream oos = new ObjectInputStream(baos);
-			    Type type = (Type) oos.readObject();
 			    socket.close();
-			    this.setChanged();
-			    this.notifyObservers(type);
 			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
