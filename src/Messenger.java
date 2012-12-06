@@ -62,12 +62,13 @@ public class Messenger implements Observer {
 	}
 	
 	public void startServers() {
-		for (InetAddress address : this.discover.getLocalAddresses()) {
+		ArrayList<InetAddress> localAddresses = this.discover.getLocalAddresses();
+		for (InetAddress address : localAddresses) {
 			if (!address.isLoopbackAddress()) {
 				Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 				if (this.peerType == Type.SUPER_PEER) {
 					try {
-						SuperPeer superPeer = new SuperPeer(address);
+						SuperPeer superPeer = new SuperPeer(localAddresses);
 						superPeer.addObserver(this);
 						server.start(superPeer);
 					} catch (RemoteException e) {
@@ -76,7 +77,7 @@ public class Messenger implements Observer {
 				}
 				else if (this.peerType == Type.PEER) {
 					try {
-						Peer peer = new Peer();
+						Peer peer = new Peer(localAddresses);
 						peer.addObserver(this);
 						server.start(peer);
 					} catch (RemoteException e) {
@@ -117,21 +118,18 @@ public class Messenger implements Observer {
 				for (int i = 0 ; i < serversAddresses.size() ; i++) {
 					try {
 						InetAddress address = serversAddresses.get(i);
-						if (!((IPeer) this.servers.get(address).getSharedObject()).hasSuperPeers()) {
-							this.servers.get(address).stop();
-							Thread.sleep(5000);
+						Server server = this.servers.get(address);
+						if (!((IPeer) server.getSharedObject()).hasSuperPeers()) {
+							server.stop();
 							this.upgrade();
-							Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-							SuperPeer superPeer = new SuperPeer(address);
+							SuperPeer superPeer = new SuperPeer(serversAddresses);
 							superPeer.addObserver(this);
 							server.start(superPeer);
 							this.servers.put(serversAddresses.get(i), server);
 						}
 					} catch (RemoteException e) {
 						e.printStackTrace();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					} 
 				}
 			}
 			if (this.peerType == Type.SUPER_PEER && !((Discover) o).isLocalAddress(clientAddress)) {
