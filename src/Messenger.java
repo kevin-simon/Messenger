@@ -117,11 +117,12 @@ public class Messenger implements Observer {
 				for (int i = 0 ; i < serversAddresses.size() ; i++) {
 					try {
 						InetAddress address = serversAddresses.get(i);
-						if (!((IPeer) this.servers.get(address).getSharedObject()).hasSuperPeers()) {
-							this.servers.get(address).stop();
-							Thread.sleep(5000);
+						Server server = this.servers.get(address);
+						if (!((IPeer) server.getSharedObject()).hasSuperPeers()) {
+							server.stop();
+							//Thread.sleep(5000);
 							this.upgrade();
-							Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+							//Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 							SuperPeer superPeer = new SuperPeer(address);
 							superPeer.addObserver(this);
 							server.start(superPeer);
@@ -129,9 +130,9 @@ public class Messenger implements Observer {
 						}
 					} catch (RemoteException e) {
 						e.printStackTrace();
-					} catch (InterruptedException e) {
+					} /*catch (InterruptedException e) {
 						e.printStackTrace();
-					}
+					}*/
 				}
 			}
 			if (this.peerType == Type.SUPER_PEER && !((Discover) o).isLocalAddress(clientAddress)) {
@@ -148,6 +149,16 @@ public class Messenger implements Observer {
 						((IPeer) client.getRemoteObject()).connectTo(((Discover) o).getLocalAddresses());
 					}
 					System.out.println("Connexion au pair " + clientAddress.getHostAddress() + " via le protocole RMI");
+					Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", "192.168.1.15", 2001);
+					ISuperPeer superPeer = (ISuperPeer) client.getRemoteObject();
+					try {
+						Message message = new Message(new Identity("Kekekiwi", InetAddress.getByName("192.168.1.16"), Type.PEER), new Identity("Marioma", InetAddress.getByName("192.168.1.8"), Type.PEER), "Pouet !");
+						superPeer.tranferMessage(message);
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				} catch (RemoteException e) {
