@@ -95,10 +95,10 @@ public class Messenger implements Observer {
 		messenger.startServers();
 		messenger.sendBroadcast("kekekiwi");
 		
-		Client<IPeer> client = new Client<IPeer>("Messenger", "192.168.1.8", 2001);
+		/*Client<IPeer> client = new Client<IPeer>("Messenger", "192.168.1.15", 2001);
 		IPeer superPeer = (IPeer) client.getRemoteObject();
 		Message message = new Message(new Identity("Kekekiwi", InetAddress.getByName("192.168.1.8"), Type.SUPER_PEER), new Identity("Kekekiwi", InetAddress.getByName("192.168.1.8"), Type.SUPER_PEER), "Pouet !");
-		superPeer.receiveMessage(message);
+		superPeer.receiveMessage(message);*/
 		
 		//new Window("Messenger");
 	}
@@ -119,6 +119,7 @@ public class Messenger implements Observer {
 						InetAddress address = serversAddresses.get(i);
 						if (!((IPeer) this.servers.get(address).getSharedObject()).hasSuperPeers()) {
 							this.upgrade();
+							this.servers.get(address).stop();
 							Server server = new Server("Messenger", address.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 							SuperPeer superPeer = new SuperPeer(address);
 							superPeer.addObserver(this);
