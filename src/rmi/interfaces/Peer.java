@@ -30,7 +30,6 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 		try {
 			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 			((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
-			//this.updateIdentities();
 			this.superPeer = superPeerIdentity;
 			System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + " effectuee");
 		} catch (NumberFormatException e) {
