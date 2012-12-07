@@ -149,6 +149,7 @@ public class Window extends JFrame {
 	}
 
 	public void updateIdentityList(ArrayList<Identity> identities) {
+		this.friendsZone.removeAll();
 		for (Identity identity : identities) {
 			this.friendsZone.addFriend(identity.getIdentity(), FriendStatus.ONLINE);
 		}

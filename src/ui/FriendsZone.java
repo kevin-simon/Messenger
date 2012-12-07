@@ -111,4 +111,8 @@ public class FriendsZone extends JPanel {
 		friend.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 		this.friends.add(friend);
 	}
+	
+	public void removeAll() {
+		this.friends.removeAll();
+	}
 }

@@ -142,13 +142,15 @@ public class Messenger implements Observer {
 				if (this.peerType == Type.SUPER_PEER) {
 					System.out.println(identities);
 					for (Identity identity : identities) {
-						try {
-							Client<IPeer> client = new Client<IPeer>("Messenger", identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-							((IPeer) client.getRemoteObject()).updateIdentities(identities);
-						} catch (NumberFormatException e) {
-							e.printStackTrace();
-						} catch (RemoteException e) {
-							e.printStackTrace();
+						if (identity != this.identity) {
+							try {
+								Client<IPeer> client = new Client<IPeer>("Messenger", identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+								((IPeer) client.getRemoteObject()).updateIdentities(identities);
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
+							} catch (RemoteException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				}
