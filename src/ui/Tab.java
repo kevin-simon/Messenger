@@ -6,20 +6,21 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import ui.action.CloseTabAction;
+import datas.Identity;
 
 public class Tab extends JPanel {
 
 	private static final long serialVersionUID = -2613782206058548076L;
 	private ChatPanel chatPanel;
 	private JLabel closeButton;
-	private String pseudonyme;
+	private Identity friend;
 	
-	public Tab(String pseudonyme, ChatPanel chatPanel) {
+	public Tab(Identity friend, ChatPanel chatPanel) {
 		super();
-		this.pseudonyme = pseudonyme;
+		this.friend = friend;
 		this.setBackground(new Color(220,220,220));
 		this.chatPanel = chatPanel;
-		this.add(new JLabel(pseudonyme));
+		this.add(new JLabel(friend.getIdentity()));
 		this.closeButton = new JLabel(ResourceManager.getImage("close-tab.png"));
 		this.add(this.closeButton); 
 	}
@@ -28,8 +29,8 @@ public class Tab extends JPanel {
 		return this.chatPanel;
 	}
 	
-	public String getText() {
-		return this.pseudonyme;
+	public Identity getIdentity() {
+		return this.friend;
 	}
 	
 	public void initCloseButton(CloseTabAction action) {

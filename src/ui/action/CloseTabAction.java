@@ -18,7 +18,7 @@ public class CloseTabAction implements MouseListener {
 	
 	@Override
 	public void mouseClicked(MouseEvent event) {
-		this.conversationsZone.removeTab(this.tab.getText());
+		this.conversationsZone.removeTab(this.tab.getIdentity().getIdentity());
 	}
 	public void mousePressed(MouseEvent event) {}
 	public void mouseReleased(MouseEvent event) {}

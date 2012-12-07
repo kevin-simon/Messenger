@@ -8,11 +8,12 @@ import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 public class Server {
 	
-	private String url;
+	private String host;
+	private int port;
+	private String name;
 	private boolean running;
 	private Remote sharedObject;
 
@@ -22,13 +23,14 @@ public class Server {
 	
 	public Server(String name, String host, int port) {
 		try {
-			Registry registry = LocateRegistry.createRegistry(port);
-			System.out.println(registry);
+			LocateRegistry.createRegistry(port);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 		this.running = false;
-		this.url = "rmi://" + host + ":" + port + "/" + name;
+		this.name = name;
+		this.host = host;
+		this.port = port;
 	}
 	
 	public Remote getSharedObject() {
@@ -36,9 +38,9 @@ public class Server {
 	}
 	
 	public void start(Remote object) {
-		System.out.println("Enregistrement de l'objet avec l'url : " + this.url);
+		System.out.println("Enregistrement de l'objet avec l'url : " + this.getUrl());
 		try {
-			Naming.rebind(this.url, object);
+			Naming.rebind(this.getUrl(), object);
 			this.sharedObject = object;
 			this.running = true;
 		} catch (RemoteException e) {
@@ -49,13 +51,17 @@ public class Server {
 		System.out.println("Serveur lance");
 	}
 	
+	public String getUrl() {
+		return  "rmi://" + this.host + ":" + this.port + "/" + this.name;
+	}
+	
 	public boolean isRunning() {
 		return this.running;
 	}
 	
 	public void stop() {
 		try {
-			Naming.unbind(this.url);
+			Naming.unbind(this.getUrl());
 			this.running = false;
 		} catch (RemoteException e) {
 			e.printStackTrace();

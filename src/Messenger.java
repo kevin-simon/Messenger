@@ -18,6 +18,7 @@ import utils.OPeer;
 import utils.OWindow;
 import utils.Properties;
 import datas.Identity;
+import datas.Message;
 
 public class Messenger implements Observer {
 	
@@ -101,7 +102,8 @@ public class Messenger implements Observer {
 			Identity clientIdentity = ((Identity) object);
 			InetAddress clientAddress = discover.getBroadcastSender();
 			if (clientIdentity.getType() == Type.PEER && this.peerType == Type.PEER && !discover.isLocalAddress(clientAddress)) {
-				try {
+			//if (clientIdentity.getType() == Type.PEER && this.peerType == Type.PEER) {	
+					try {
 					if (!((IPeer) server.getSharedObject()).hasSuperPeers()) {
 						server.stop();
 						this.upgrade();
@@ -113,6 +115,7 @@ public class Messenger implements Observer {
 				}
 			}
 			if (this.peerType == Type.SUPER_PEER && !discover.isLocalAddress(clientAddress)) {
+			//if (this.peerType == Type.SUPER_PEER) {
 				System.out.println("Demande d'acces d'un pair de type " + clientIdentity.getType());
 				try {
 					if (clientIdentity.getType() == Type.SUPER_PEER) {
@@ -156,14 +159,46 @@ public class Messenger implements Observer {
 				identities.remove(this.identity);
 				this.window.updateIdentityList(identities);
 			}
+			else if (object instanceof Message) {
+				Message message = (Message) object;
+				this.window.receiveMessage(message);
+			}
 		}
 		else if (o instanceof OWindow) {
 			if (object instanceof String) {
 				String pseudonyme = (String) object;
 				this.identity = new Identity(pseudonyme, this.discover.getLocalAddress(), this.peerType);
+				this.window.initializeView(this.identity);
 				this.startServer();
 				this.sendBroadcast();
 			}
+			else if (object instanceof Message) {
+				Message message = (Message) object;
+				try {
+					Client<IPeer> client = new Client<IPeer>("Messenger", this.identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+					((IPeer) client.getRemoteObject()).sendMessage(message);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+			else if (object == null) {
+				this.closeApplication();
+			}
+		}
+	}
+	
+	public void closeApplication() {
+		try {
+			if (this.identity != null) {
+				Client<IPeer> client = new Client<IPeer>("Messenger", this.identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+				((IPeer) client.getRemoteObject()).disconnect();
+			}
+			System.out.println("Fermeture de l'application !");
+			System.exit(0);
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 

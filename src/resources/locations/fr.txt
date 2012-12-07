@@ -6,23 +6,24 @@ offline=Hors ligne
 
 loginItem=Se connecter
 
-logoutItem=Se déconnecter
+logoutItem=Se deconnecter
 
 exitWindowItem=Fermer
 
 closeWindow=Voulez vous vraiment quitter Messenger ?
 closeWindowTitle=Quitter ?
 
-offlineWindow=Vous ne pouvez pas envoyer de messages car vous êtes hors ligne.
+offlineWindow=Vous ne pouvez pas envoyer de messages car vous etes hors ligne.
 offlineWindowTitle=Hors ligne !
 
-aboutWindowItem=A propos
-aboutWindow=Informations !!!!
-aboutWindowTitle=A propos
+aboutWindowItem=A propos de Messenger
+aboutWindow=Kévin Simon - Matthieu Lenogue\t\t\t\nMaster 2 Informatique - Parcours ALMA\nFaculté des Sciences et Techniques\nUniversité de Nantes\n\nCopyright ©Décembre 2012\n\n
+aboutUrlWindow=http://www.ks-labs.fr
+aboutWindowTitle=A propos de Messenger
 
 pseudonymeLabel=Pseudonyme
 passwordLabel=Mot de passe
 subscribeTitle=Pas de compte ?
-connectionTitle=Déjà un compte ?
+connectionTitle=Deja un compte ?
 subscribeButton=S'inscrire
 connectionButton=Se connecter

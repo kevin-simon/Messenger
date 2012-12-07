@@ -21,7 +21,7 @@ public class SendMessageAction extends Action {
 		if (this.window.getStatus().isOnline()) {
 			String message = this.chatPanel.getMessage();
 			if (message.length() > 0) { 
-				this.chatPanel.showMessage("moi", message + "\n");
+				this.window.sendMessage(this.chatPanel.getFriendIdentity(), message);
 			}
 		}
 		else {

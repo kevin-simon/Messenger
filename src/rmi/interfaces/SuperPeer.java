@@ -34,7 +34,7 @@ public class SuperPeer extends Peer implements ISuperPeer {
 	public void tranferMessage(Message message) throws RemoteException {
 		boolean messageTransmit = false;
 		for (Identity peerIdentity : this.onlinePeers) {
-			if (peerIdentity == message.getReceiver()) {
+			if (peerIdentity.getIdentity().equals(message.getReceiver().getIdentity())) {
 				Client<IPeer> client = new Client<IPeer>("Messenger", peerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 				((IPeer) client.getRemoteObject()).receiveMessage(message);
 				messageTransmit = true;
@@ -61,6 +61,19 @@ public class SuperPeer extends Peer implements ISuperPeer {
 	@Override
 	public void addSuperPeer(Identity identity) throws RemoteException {
 		this.superPeers.add(identity);
+	}
+
+	@Override
+	public void disconnect(Identity identity) throws RemoteException {
+		Identity remove = null;
+		for (Identity onlinePeer : this.onlinePeers) {
+			if (onlinePeer.getIdentity().equals(identity.getIdentity())) {
+				remove = onlinePeer;
+			}
+		}
+		this.onlinePeers.remove(remove);
+		this.observableObject.setChanged();
+		this.observableObject.notifyObservers(this.onlinePeers);
 	}
 
 	

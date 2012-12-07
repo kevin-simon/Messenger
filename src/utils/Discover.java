@@ -101,7 +101,7 @@ public class Discover extends Observable implements Runnable {
 				 byte[] data = new byte[4];
 			    DatagramPacket packet = new DatagramPacket(data, data.length );
 			    socket.receive(packet);
-				if (this.localAddress != packet.getAddress()) {
+				if (!this.localAddress.getHostAddress().equals(packet.getAddress().getHostAddress())) {
 				    System.out.println("Reception d'un packet broadcaste depuis " + packet.getAddress());
 				    int len = 0;
 				    for (int i = 0; i < 4; ++i) {

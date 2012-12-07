@@ -9,16 +9,17 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import ui.action.CloseTabAction;
+import datas.Identity;
 
 public class ConversationsZone extends JTabbedPane {
 	
 	private static final long serialVersionUID = 5835671053875226860L;
 	private Window window;
-	private HashMap<String, Tab> tabList;
+	private HashMap<Identity, Tab> tabList;
 
 	public ConversationsZone(Window window) {
 		super();
-		this.tabList = new HashMap<String, Tab>();
+		this.tabList = new HashMap<Identity, Tab>();
 		this.window = window;
 		this.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		JPanel mainPanel = this.window.mainPanel();
@@ -32,18 +33,30 @@ public class ConversationsZone extends JTabbedPane {
 		gbc.fill = GridBagConstraints.BOTH;
 	    mainPanel.add(this, BorderLayout.CENTER);
 	}
+	
+	public Tab getTab(Identity friendIdentity) {
+		if (!this.tabList.containsKey(friendIdentity)) {
+			for (Identity identity : this.tabList.keySet()) {
+				if (identity.getIdentity().equals(friendIdentity.getIdentity())) {
+					return this.tabList.get(identity);
+				}
+			}
+			this.addTab(friendIdentity);
+		}
+		return this.tabList.get(friendIdentity);
+	}
 
-	public void addTab(String pseudonyme) {
+	public void addTab(Identity friend) {
 		Tab tab = null;
-		if (!this.tabList.containsKey(pseudonyme)) {
-			tab = new Tab(pseudonyme, new ChatPanel(this.window));
-			super.addTab(tab.getText(), tab.getChatPanel());
+		if (!this.tabList.containsKey(friend)) {
+			tab = new Tab(friend, new ChatPanel(this.window, friend));
+			super.addTab(tab.getIdentity().getIdentity(), tab.getChatPanel());
 			this.setTabComponentAt(this.tabList.size(), tab);
 			tab.initCloseButton(new CloseTabAction(this, tab));
-			this.tabList.put(pseudonyme, tab);
+			this.tabList.put(friend, tab);
 		}
 		else {
-			tab = this.tabList.get(pseudonyme);
+			tab = this.tabList.get(friend);
 		}
 		this.setSelectedIndex(this.indexOfTabComponent(tab));
 		this.window.setVisible(true);

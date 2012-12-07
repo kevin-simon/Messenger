@@ -3,6 +3,9 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -16,6 +19,8 @@ import javax.swing.text.Document;
 
 import ui.action.EnterAction;
 import ui.action.SendMessageAction;
+import datas.Identity;
+import datas.Message;
 
 public class ChatPanel extends JPanel {
 
@@ -24,9 +29,11 @@ public class ChatPanel extends JPanel {
 	private JTextField message;
 	private JEditorPane chatRoom;
 	private String previousUser;
+	private Identity friend; 
 	
-	public ChatPanel(Window window) {
+	public ChatPanel(Window window, Identity friend) {
 		super(new BorderLayout());
+		this.friend = friend;
 		this.chatRoom = new JEditorPane();
 		this.previousUser = "";
 		JPanel panel = new JPanel(new BorderLayout());
@@ -60,26 +67,36 @@ public class ChatPanel extends JPanel {
 		this.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 5));
 	}
 	
+	public Identity getFriendIdentity() {
+		return this.friend;
+	}
+	
 	public String getMessage() {
 		String message = this.message.getText();
 		this.message.setText("");
 		return message;
 	}
 	
-	public void showMessage(String user, String message) {
+	public void showMessage(Message message) {
 		String texte = "";
-		if (!this.previousUser.equals(user) && !this.previousUser.equals("")) {
+		if (!this.previousUser.equals(message.getSender().getPseudonyme()) && !this.previousUser.equals("")) {
 			texte += "--------------------\n";
 		}
-		texte += "(00:00) " + user + "\n";
-		texte += message;
+		texte += this.getDate() + " " + message.getSender().getPseudonyme() + "\n";
+		texte += message.getMessage() + "\n";
 		Document doc = this.chatRoom.getDocument();
 		try {
 			doc.insertString(doc.getLength(), texte, null);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
-		this.previousUser = user;
+		this.previousUser = message.getSender().getPseudonyme();
+	}
+	
+	public String getDate() {
+		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss");
+        Date date = new Date();
+        return "(" + dateFormat.format(date) + ")";
 	}
 	
 	public void giveFocus() {

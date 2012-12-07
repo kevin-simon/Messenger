@@ -12,4 +12,5 @@ public interface ISuperPeer extends IPeer {
 	public void subscribePeer(Identity identity) throws RemoteException;
 	public void addSuperPeer(Identity identity) throws RemoteException;
 	public void tranferMessage(Message message) throws RemoteException;
+	public void disconnect(Identity identity) throws RemoteException;
 }

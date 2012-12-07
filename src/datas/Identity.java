@@ -12,11 +12,19 @@ public class Identity implements Serializable {
 	private String pseudonyme;
 	private InetAddress address;
 	private Type type;
+	
+	public Identity(Identity identity) {
+		this(identity.getAddress(), identity.getInetAddress(), identity.getType());
+	}
 
 	public Identity(String pseudonyme, InetAddress inetAddress, Type type) {
 		this.pseudonyme = pseudonyme;
 		this.address = inetAddress;
 		this.type = type;
+	}
+	
+	public InetAddress getInetAddress() {
+		return this.address;
 	}
 	
 	public String getAddress() {

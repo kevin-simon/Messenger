@@ -55,6 +55,20 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 		this.observableObject.setChanged();
 		this.observableObject.notifyObservers(identities);
 	}
+
+	@Override
+	public void sendMessage(Message message) throws RemoteException {
+		Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+		((ISuperPeer) client.getRemoteObject()).tranferMessage(message);
+	}
+
+	@Override
+	public void disconnect() throws RemoteException {
+		if (this.superPeer != null) {
+			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+			((ISuperPeer) client.getRemoteObject()).disconnect(this.localIdentity);
+		}
+	}
 	
 	
 

@@ -3,31 +3,34 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Observer;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.UIManager;
 
-import datas.Identity;
-
 import ui.action.AboutAction;
-import ui.action.ExitAction;
-import ui.action.LoginAction;
-import ui.action.LogoutAction;
 import ui.action.WindowAction;
 import ui.location.Location;
 import utils.OWindow;
+import datas.Identity;
+import datas.Message;
 
 public class Window extends JFrame {
 
 	private static final long serialVersionUID = 7446192599263749847L;
 	public static Color defaultColor;
 	public OWindow observableObject;
+	public Identity identity;
 	
 	private JPanel main;
 	private ConnectionWindow connectionWindow;
@@ -73,7 +76,6 @@ public class Window extends JFrame {
 	
 	public void loadMessenger(String pseudonyme) {
 	    this.mainPanel().removeAll();
-		initializeView(pseudonyme);
 		JPanel mainPanel = this.mainPanel();
 		mainPanel.setLayout(new BorderLayout());
 		initializeFriendsZone();
@@ -83,13 +85,15 @@ public class Window extends JFrame {
 		this.setVisible(true);
 	}
 	
-	public void initializeView(String pseudonyme) {
-		this.status = new Status(pseudonyme);
+	public void initializeView(Identity identity) {
+		this.identity = identity;
+		this.status = new Status(identity.getIdentity());
 		this.toolbar.add(this.status, 0);
-		this.toolbar.addSeparator(1);
+		this.status.login();
+		/*this.toolbar.addSeparator(1);
 		this.toolbar.addItem(Location.get("loginItem"), ResourceManager.getImage("login.png"), new LoginAction(this), 2);
 		this.toolbar.addItem(Location.get("logoutItem"), ResourceManager.getImage("logout.png"), new LogoutAction(this), 3);
-		this.toolbar.addItem(Location.get("exitWindowItem"), ResourceManager.getImage("exit.png"), new ExitAction(this));
+		this.toolbar.addItem(Location.get("exitWindowItem"), ResourceManager.getImage("exit.png"), new ExitAction(this));*/
 		this.setVisible(true);
 	}
 	
@@ -106,7 +110,7 @@ public class Window extends JFrame {
 		this.conversationsZone = new ConversationsZone(this);
 	}
 	
-	public void openConversation(String friend) {
+	public void openConversation(Identity friend) {
 		this.conversationsZone.addTab(friend);
 	}
 	
@@ -133,15 +137,23 @@ public class Window extends JFrame {
 	}
 	
 	public boolean closeWindow() {
-		return JOptionPane.showConfirmDialog(this, Location.get("closeWindow"), "PeerMessenger - " + Location.get("closeWindowTitle"), JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("question.png")) == JOptionPane.YES_OPTION;
+		return JOptionPane.showConfirmDialog(this, Location.get("closeWindow"), "Messenger - " + Location.get("closeWindowTitle"), JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("question.png")) == JOptionPane.YES_OPTION;
 	}
 	
 	public void aboutWindow() {
-		JOptionPane.showMessageDialog(this, Location.get("aboutWindow"), "PeerMessenger - " + Location.get("aboutWindowTitle"), JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("about.png"));
+		JTextArea textArea = new JTextArea(Location.get("aboutWindow") + Location.get("aboutUrlWindow") + "\n");
+		textArea.setColumns(30);
+		textArea.setLineWrap( true );
+		textArea.setWrapStyleWord( true );
+		textArea.setSize(textArea.getPreferredSize().width, 1);
+		textArea.setBackground(defaultColor);
+		textArea.setEnabled(false);
+		textArea.setDisabledTextColor(Color.black);
+		JOptionPane.showMessageDialog(this, textArea, "Messenger - " + Location.get("aboutWindowTitle"), JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("about.png"));
 	}
 	
 	public void offlineWindow() {
-		JOptionPane.showMessageDialog(this, Location.get("offlineWindow"), "PeerMessenger - " + Location.get("offlineWindowTitle"), JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("about.png"));
+		JOptionPane.showMessageDialog(this, Location.get("offlineWindow"), "Messenger - " + Location.get("offlineWindowTitle"), JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("about.png"));
 	}
 
 	public void addObserver(Observer observer) {
@@ -151,8 +163,28 @@ public class Window extends JFrame {
 	public void updateIdentityList(ArrayList<Identity> identities) {
 		this.friendsZone.removeAll();
 		for (Identity identity : identities) {
-			this.friendsZone.addFriend(identity.getIdentity(), FriendStatus.ONLINE);
+			this.friendsZone.addFriend(identity, FriendStatus.ONLINE);
 		}
 		this.setVisible(true);
+	}
+
+	public void sendMessage(Identity friend, String message) {
+		Message messageSending = new Message(this.identity, friend, message);
+		this.conversationsZone.getTab(friend).getChatPanel().showMessage(messageSending);
+		this.observableObject.setChanged();
+		this.observableObject.notifyObservers(messageSending);
+	}
+	
+	public void receiveMessage(Message message) {
+
+		System.out.println("sender : " + message.getSender());
+		System.out.println("receiver : " + message.getReceiver());
+		System.out.println("message : " + message.getMessage());
+		this.conversationsZone.getTab(message.getReceiver()).getChatPanel().showMessage(message);
+	}
+	
+	public void closeApplication() {
+		this.observableObject.setChanged();
+		this.observableObject.notifyObservers(null);
 	}
 }

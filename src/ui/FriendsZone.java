@@ -13,6 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import datas.Identity;
+
 public class FriendsZone extends JPanel {
 
 	private static final long serialVersionUID = -5440717821701838804L;
@@ -56,16 +58,16 @@ public class FriendsZone extends JPanel {
 		this.add(scroll, BorderLayout.CENTER);
 	}
 	
-	public void addFriend(String pseudonyme, FriendStatus status) {
+	public void addFriend(final Identity friendIdentity, FriendStatus status) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = this.friends.getComponentCount();
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		gbc.anchor = GridBagConstraints.LINE_START;
-		JLabel friend = new JLabel(pseudonyme, JLabel.CENTER);
+		JLabel friend = new JLabel(friendIdentity.getIdentity(), JLabel.CENTER);
 		if (status == FriendStatus.ONLINE) {
 			friend.setIcon(ResourceManager.getImage("friend-online.png"));
-			friend.setToolTipText(pseudonyme + " is online");
+			friend.setToolTipText(friendIdentity.getIdentity() + " is online");
 			friend.addMouseListener(new MouseListener() {
 				
 				@Override
@@ -95,18 +97,18 @@ public class FriendsZone extends JPanel {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					if (e.getClickCount() == 2) {
-						window.openConversation(((JLabel) e.getComponent()).getText());
+						window.openConversation(friendIdentity);
 					}
 				}
 			});
 		}
 		else if (status == FriendStatus.WAITING) {
 			friend.setIcon(ResourceManager.getImage("inconnu.png"));
-			friend.setToolTipText(pseudonyme + " wait your acceptation");
+			friend.setToolTipText(friendIdentity.getIdentity() + " wait your acceptation");
 		}
 		else {
 			friend.setIcon(ResourceManager.getImage("friend-offline.png"));
-			friend.setToolTipText(pseudonyme + " is offline");
+			friend.setToolTipText(friendIdentity.getIdentity() + " is offline");
 		}
 		friend.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 		this.friends.add(friend);

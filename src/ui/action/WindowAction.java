@@ -16,7 +16,7 @@ public class WindowAction implements WindowListener {
 	@Override
 	public void windowClosing(WindowEvent event) {
 		if (this.window.closeWindow()) {
-			System.exit(0);
+			this.window.closeApplication();
 		}
 	}
 
