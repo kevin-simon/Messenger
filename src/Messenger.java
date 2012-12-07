@@ -106,7 +106,7 @@ public class Messenger implements Observer {
 			Discover discover = (Discover) o;
 			Identity clientIdentity = ((Identity) object);
 			InetAddress clientAddress = discover.getBroadcastSender();
-			if (this.peerType == Type.PEER && !discover.isLocalAddress(clientAddress)) {
+			if (clientIdentity.getType() == Type.PEER && this.peerType == Type.PEER && !discover.isLocalAddress(clientAddress)) {
 				try {
 					if (!((IPeer) server.getSharedObject()).hasSuperPeers()) {
 						server.stop();
@@ -130,7 +130,7 @@ public class Messenger implements Observer {
 					else if (clientIdentity.getType() == Type.PEER) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.peers.put(clientIdentity.getAddress(), client);
-						System.out.println(discover.getLocalAddress());
+						System.out.println(((IPeer) client.getRemoteObject()));
 						((IPeer) client.getRemoteObject()).connectTo(discover.getLocalAddress());
 					}
 					System.out.println("Connexion au pair " + clientIdentity.getAddress() + " via le protocole RMI");
