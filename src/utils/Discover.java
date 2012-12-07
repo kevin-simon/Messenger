@@ -34,9 +34,11 @@ public class Discover extends Observable implements Runnable {
 				List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
 				for (InterfaceAddress interfaceAddress : interfaceAddresses) {
 					InetAddress broadcastAddress;
-					this.localAddresses.put(networkInterface.getName(), interfaceAddress.getAddress());
-					if ((broadcastAddress = interfaceAddress.getBroadcast()) != null) {
-						this.broadcastAddresses.put(networkInterface.getName(), broadcastAddress);
+					if (!interfaceAddress.getAddress().isLoopbackAddress()) {
+						this.localAddresses.put(networkInterface.getName(), interfaceAddress.getAddress());
+						if ((broadcastAddress = interfaceAddress.getBroadcast()) != null) {
+							this.broadcastAddresses.put(networkInterface.getName(), broadcastAddress);
+						}
 					}
 				}
 			}
