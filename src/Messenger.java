@@ -128,7 +128,6 @@ public class Messenger implements Observer {
 					else if (clientIdentity.getType() == Type.PEER) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.peers.put(clientIdentity.getAddress(), client);
-						System.out.println(((IPeer) client.getRemoteObject()));
 						((IPeer) client.getRemoteObject()).connectTo(this.identity);
 					}
 					System.out.println("Connexion au pair " + clientIdentity.getAddress() + " via le protocole RMI");
@@ -148,6 +147,17 @@ public class Messenger implements Observer {
 						if (identity != this.identity) {
 							identities.add((Identity) unknownObject);
 						}
+					}
+				}
+				for (Identity identity : identities) {
+					Client<IPeer> client;
+					try {
+						client = new Client<IPeer>("Messenger", identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+						((IPeer) client.getRemoteObject()).updateIdentities(identities);
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
+					} catch (RemoteException e) {
+						e.printStackTrace();
 					}
 				}
 				this.window.updateIdentityList(identities);
