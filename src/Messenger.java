@@ -119,28 +119,27 @@ public class Messenger implements Observer {
 					e.printStackTrace();
 				}
 			}
-			if (this.peerType == Type.SUPER_PEER && !((Discover) o).isLocalAddress(clientAddress)) {
+			if (this.peerType == Type.SUPER_PEER && !discover.isLocalAddress(clientAddress)) {
 				System.out.println("Demande d'acces d'un pair de type " + clientIdentity.getType());
 				try {
 					if (clientIdentity.getType() == Type.SUPER_PEER) {
-						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-						this.superPeers.put(clientAddress.getHostAddress(), client);
-						((ISuperPeer) client.getRemoteObject()).connectTo(((Discover) o).getLocalAddress());
+						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+						this.superPeers.put(clientIdentity.getAddress(), client);
+						((ISuperPeer) client.getRemoteObject()).connectTo(discover.getLocalAddress());
 					}
 					else if (clientIdentity.getType() == Type.PEER) {
-						Client<IPeer> client = new Client<IPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-						this.peers.put(clientAddress.getHostAddress(), client);
-						System.out.println(client);
-						((IPeer) client.getRemoteObject()).connectTo(((Discover) o).getLocalAddress());
+						Client<IPeer> client = new Client<IPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+						this.peers.put(clientIdentity.getAddress(), client);
+						System.out.println(discover.getLocalAddress());
+						((IPeer) client.getRemoteObject()).connectTo(discover.getLocalAddress());
 					}
-					System.out.println("Connexion au pair " + clientAddress.getHostAddress() + " via le protocole RMI");
+					System.out.println("Connexion au pair " + clientIdentity.getAddress() + " via le protocole RMI");
 					Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", "192.168.1.15", 2001);
 					ISuperPeer superPeer = (ISuperPeer) client.getRemoteObject();
 					try {
 						Message message = new Message(new Identity("Kekekiwi", InetAddress.getByName("192.168.1.16"), Type.PEER), new Identity("Marioma", InetAddress.getByName("192.168.1.8"), Type.PEER), "Pouet !");
 						superPeer.tranferMessage(message);
 					} catch (UnknownHostException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					
