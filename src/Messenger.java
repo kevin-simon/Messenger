@@ -19,7 +19,7 @@ import utils.OWindow;
 import utils.Properties;
 import datas.Identity;
 
-public class Messenger extends Thread implements Observer {
+public class Messenger implements Observer {
 	
 	private static Messenger instance;
 	private Window window;
@@ -76,7 +76,6 @@ public class Messenger extends Thread implements Observer {
 				e.printStackTrace();
 			}
 		}
-		this.start();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -140,6 +139,18 @@ public class Messenger extends Thread implements Observer {
 						identities.add((Identity) unknownObject);
 					}
 				}
+				if (this.peerType == Type.SUPER_PEER) {
+					for (Identity identity : identities) {
+						try {
+							Client<IPeer> client = new Client<IPeer>("Messenger", identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+							((IPeer) client.getRemoteObject()).updateIdentities(identities);
+						} catch (NumberFormatException e) {
+							e.printStackTrace();
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 				identities.remove(this.identity);
 				this.window.updateIdentityList(identities);
 			}
@@ -154,19 +165,4 @@ public class Messenger extends Thread implements Observer {
 		}
 	}
 
-	public void run() {
-		while (true) {
-			try {
-				Client<IPeer> client = new Client<IPeer>("Messenger", this.identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-				((IPeer) client.getRemoteObject()).updateIdentities();
-				Thread.sleep(Integer.parseInt(Properties.APP.get("update_frequency")) * 1000);
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 }

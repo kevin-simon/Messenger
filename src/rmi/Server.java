@@ -8,6 +8,7 @@ import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class Server {
 	
@@ -21,7 +22,8 @@ public class Server {
 	
 	public Server(String name, String host, int port) {
 		try {
-			LocateRegistry.createRegistry(port);
+			Registry registry = LocateRegistry.createRegistry(port);
+			System.out.println(registry);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
