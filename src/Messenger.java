@@ -143,12 +143,21 @@ public class Messenger implements Observer {
 				ArrayList<Identity> identities = new ArrayList<Identity>();
 				for (Object unknownObject : (ArrayList<?>) object) {
 					if (unknownObject instanceof Identity) {
-						Identity identity = (Identity) unknownObject;
-						if (identity != this.identity) {
-							identities.add((Identity) unknownObject);
-						}
+						identities.add((Identity) unknownObject);
 					}
 				}
+				for (Identity identity : identities) {
+					Client<IPeer> client;
+					try {
+						client = new Client<IPeer>("Messenger", identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+						((IPeer) client.getRemoteObject()).updateIdentities(identities);
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				}
+				identities.remove(this.identity);
 				this.window.updateIdentityList(identities);
 			}
 		}

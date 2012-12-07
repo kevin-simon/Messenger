@@ -30,7 +30,6 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 		try {
 			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 			((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
-			this.updateIdentities();
 			this.superPeer = superPeerIdentity;
 			System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + " effectuee");
 		} catch (NumberFormatException e) {
@@ -52,9 +51,7 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 	}
 
 	@Override
-	public void updateIdentities() throws RemoteException {
-		Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-		ArrayList<Identity> identities = ((ISuperPeer) client.getRemoteObject()).getOnlinePeers();
+	public void updateIdentities(ArrayList<Identity> identities) throws RemoteException {
 		this.observableObject.setChanged();
 		this.observableObject.notifyObservers(identities);
 	}
