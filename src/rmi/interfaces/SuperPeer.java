@@ -20,6 +20,7 @@ public class SuperPeer extends Peer implements ISuperPeer {
 	public SuperPeer(Observer observer, Identity identity) throws RemoteException {
 		super(observer, identity);
 		this.superPeers = new ArrayList<Identity>();
+		this.superPeer = identity;
 		this.onlinePeers = new ArrayList<Identity>();
 		this.transmittedMessages = new ArrayList<Message>();
 		this.onlinePeers.add(this.localIdentity);

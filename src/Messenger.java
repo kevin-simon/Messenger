@@ -183,7 +183,7 @@ public class Messenger implements Observer {
 					e.printStackTrace();
 				}
 			}
-			else if (object == null) {
+			else if (object == null && this.peerType == Type.PEER) {
 				this.closeApplication();
 			}
 		}
@@ -192,8 +192,10 @@ public class Messenger implements Observer {
 	public void closeApplication() {
 		try {
 			if (this.identity != null) {
-				Client<IPeer> client = new Client<IPeer>("Messenger", this.identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-				((IPeer) client.getRemoteObject()).disconnect();
+				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+				if (((ISuperPeer) client.getRemoteObject()).getOnlinePeers().size() == 0) {
+					((IPeer) client.getRemoteObject()).disconnect();
+				}
 			}
 			System.out.println("Fermeture de l'application !");
 			System.exit(0);

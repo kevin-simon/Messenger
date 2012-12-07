@@ -180,7 +180,7 @@ public class Window extends JFrame {
 		System.out.println("sender : " + message.getSender());
 		System.out.println("receiver : " + message.getReceiver());
 		System.out.println("message : " + message.getMessage());
-		this.conversationsZone.getTab(message.getReceiver()).getChatPanel().showMessage(message);
+		this.conversationsZone.getTab(message.getSender()).getChatPanel().showMessage(message);
 	}
 	
 	public void closeApplication() {
