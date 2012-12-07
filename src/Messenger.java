@@ -144,10 +144,13 @@ public class Messenger implements Observer {
 				ArrayList<Identity> identities = new ArrayList<Identity>();
 				for (Object unknownObject : (ArrayList<?>) object) {
 					if (unknownObject instanceof Identity) {
-						identities.add((Identity) unknownObject);
+						Identity identity = (Identity) unknownObject;
+						if (identity != this.identity) {
+							identities.add((Identity) unknownObject);
+						}
 					}
 				}
-				System.out.println(identities);
+				this.window.updateIdentityList(identities);
 			}
 		}
 		else if (o instanceof OWindow) {

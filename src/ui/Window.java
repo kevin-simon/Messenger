@@ -3,6 +3,7 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.Observer;
 
 import javax.swing.Box;
@@ -11,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+
+import datas.Identity;
 
 import ui.action.AboutAction;
 import ui.action.ExitAction;
@@ -92,10 +95,6 @@ public class Window extends JFrame {
 	
 	public void initializeFriendsZone() {
 		this.friendsZone = new FriendsZone(this);
-		this.friendsZone.addFriend("Marioma", FriendStatus.ONLINE);
-		this.friendsZone.addFriend("Nephitos", FriendStatus.ONLINE);
-		this.friendsZone.addFriend("Kekekiwi", FriendStatus.WAITING);
-
 	}
 	
 	public void initializeConversationsZone() {
@@ -147,5 +146,13 @@ public class Window extends JFrame {
 
 	public void addObserver(Observer observer) {
 		this.observableObject.addObserver(observer);
+	}
+
+	public void updateIdentityList(ArrayList<Identity> identities) {
+		this.friendsZone.removeAll();
+		for (Identity identity : identities) {
+			this.friendsZone.addFriend(identity.getIdentity(), FriendStatus.ONLINE);
+		}
+		this.setVisible(true);
 	}
 }
