@@ -16,12 +16,12 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 	private static final long serialVersionUID = -3914853933537229529L;
 	protected ArrayList<Client<ISuperPeer>> superPeers;
 	private OPeer observableObject;
-	private ArrayList<InetAddress> localAddresses;
+	protected InetAddress localAddress;
 
-	public Peer(ArrayList<InetAddress> inetAddresses) throws RemoteException {
+	public Peer(InetAddress inetAddresses) throws RemoteException {
 		super();
 		this.observableObject = new OPeer();
-		this.localAddresses = inetAddresses;
+		this.localAddress = inetAddresses;
 		this.superPeers = new ArrayList<Client<ISuperPeer>>();
 	}
 	
@@ -30,20 +30,16 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 	}
 
 	@Override
-	public void connectTo(ArrayList<InetAddress> superPeerAddresses) throws RemoteException {
-		for (InetAddress superPeerAddress : superPeerAddresses) {
-			try {
-				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-				for (InetAddress localAddress : this.localAddresses) {
-					((ISuperPeer) client.getRemoteObject()).subscribePeer(localAddress);
-				}
-				this.superPeers.add(client);
-				System.out.println("Connexion au super pair : " + superPeerAddress.getHostAddress());
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+	public void connectTo(InetAddress superPeerAddress) throws RemoteException {
+		try {
+			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+			((ISuperPeer) client.getRemoteObject()).subscribePeer(localAddress);
+			this.superPeers.add(client);
+			System.out.println("Connexion au super pair : " + superPeerAddress.getHostAddress());
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
