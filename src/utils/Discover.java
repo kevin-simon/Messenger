@@ -32,8 +32,10 @@ public class Discover extends Observable implements Runnable {
 					this.broadcastAddress = interfaceAddress.getBroadcast();
 					if (!interfaceAddress.getAddress().isLoopbackAddress() && broadcastAddress != null) {
 						this.localAddress = interfaceAddress.getAddress();
-						break;
 					}
+				}
+				if (networkInterface.getName() == Properties.APP.get("network_interface")) {
+					break;
 				}
 			}
 		} catch (Exception e) {

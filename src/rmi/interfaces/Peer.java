@@ -2,6 +2,7 @@ package rmi.interfaces;
 
 import java.net.InetAddress;
 import java.rmi.RemoteException;
+import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Observer;
@@ -31,14 +32,19 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 
 	@Override
 	public void connectTo(InetAddress superPeerAddress) throws RemoteException {
+		System.out.println(superPeerAddress);
 		try {
 			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+			System.out.println(client.getClientHost());
 			((ISuperPeer) client.getRemoteObject()).subscribePeer(localAddress);
 			this.superPeers.add(client);
 			System.out.println("Connexion au super pair : " + superPeerAddress.getHostAddress());
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (ServerNotActiveException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
