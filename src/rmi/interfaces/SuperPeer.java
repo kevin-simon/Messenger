@@ -15,14 +15,12 @@ public class SuperPeer extends Peer implements ISuperPeer {
 	private ArrayList<Client<IPeer>> onlinePeers;
 	private ArrayList<Message> transmittedMessages;
 
-	public SuperPeer(ArrayList<InetAddress> inetAddresses) throws RemoteException {
-		super(inetAddresses);
+	public SuperPeer(InetAddress inetAddress) throws RemoteException {
+		super(inetAddress);
 		this.superPeers = new ArrayList<Client<ISuperPeer>>();
 		this.onlinePeers = new ArrayList<Client<IPeer>>();
 		this.transmittedMessages = new ArrayList<Message>();
-		for (InetAddress localAddress : inetAddresses) {
-			this.onlinePeers.add(new Client<IPeer>("Messenger", localAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port"))));
-		}
+		this.onlinePeers.add(new Client<IPeer>("Messenger", this.localAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port"))));
 	}
 	
 	@Override
