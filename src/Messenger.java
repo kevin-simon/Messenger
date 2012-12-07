@@ -2,7 +2,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -20,7 +19,7 @@ import utils.OWindow;
 import utils.Properties;
 import datas.Identity;
 
-public class Messenger implements Observer {
+public class Messenger extends Thread implements Observer {
 	
 	private static Messenger instance;
 	private Window window;
@@ -28,8 +27,6 @@ public class Messenger implements Observer {
 	private Identity identity;
 	private Discover discover;
 	private Server server;
-	private HashMap<String, Client<IPeer>> peers;
-	private HashMap<String, Client<ISuperPeer>> superPeers;
 	
 	public static Messenger getInstance() {
 		if (Messenger.instance == null) {
@@ -46,7 +43,6 @@ public class Messenger implements Observer {
 	
 	public Messenger() throws NumberFormatException, UnknownHostException {
 		this.discover = new Discover();
-		this.superPeers = new HashMap<String, Client<ISuperPeer>>();
 		this.peerType = Type.PEER;
 		discover.addObserver(this);
 		discover.start();
@@ -59,7 +55,6 @@ public class Messenger implements Observer {
 	public void upgrade() {
 		System.out.println("Mode Super-pair active !");
 		this.peerType = Type.SUPER_PEER;
-		this.peers = new HashMap<String, Client<IPeer>>();
 	}
 	
 	public void startServer() {
@@ -81,6 +76,7 @@ public class Messenger implements Observer {
 				e.printStackTrace();
 			}
 		}
+		this.start();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -122,12 +118,10 @@ public class Messenger implements Observer {
 				try {
 					if (clientIdentity.getType() == Type.SUPER_PEER) {
 						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-						this.superPeers.put(clientIdentity.getAddress(), client);
 						((ISuperPeer) client.getRemoteObject()).connectTo(this.identity);
 					}
 					else if (clientIdentity.getType() == Type.PEER) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-						this.peers.put(clientIdentity.getAddress(), client);
 						((IPeer) client.getRemoteObject()).connectTo(this.identity);
 					}
 					System.out.println("Connexion au pair " + clientIdentity.getAddress() + " via le protocole RMI");
@@ -146,17 +140,6 @@ public class Messenger implements Observer {
 						identities.add((Identity) unknownObject);
 					}
 				}
-				for (Identity identity : identities) {
-					Client<IPeer> client;
-					try {
-						client = new Client<IPeer>("Messenger", identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-						((IPeer) client.getRemoteObject()).updateIdentities(identities);
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
 				identities.remove(this.identity);
 				this.window.updateIdentityList(identities);
 			}
@@ -171,4 +154,19 @@ public class Messenger implements Observer {
 		}
 	}
 
+	public void run() {
+		while (true) {
+			try {
+				Client<IPeer> client = new Client<IPeer>("Messenger", this.identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+				((IPeer) client.getRemoteObject()).updateIdentities();
+				Thread.sleep(Integer.parseInt(Properties.APP.get("update_frequency")) * 1000);
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
