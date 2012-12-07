@@ -120,6 +120,7 @@ public class Discover extends Observable implements Runnable {
 			    socket.close();
 			} catch(Exception ex) {
 				ex.printStackTrace();
+				System.exit(1);
 			}
 		}
     }

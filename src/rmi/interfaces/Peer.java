@@ -1,8 +1,6 @@
 package rmi.interfaces;
 
-import java.net.InetAddress;
 import java.rmi.RemoteException;
-import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Observer;
@@ -10,41 +8,34 @@ import java.util.Observer;
 import rmi.Client;
 import utils.OPeer;
 import utils.Properties;
+import datas.Identity;
 import datas.Message;
 
 public class Peer extends UnicastRemoteObject implements IPeer {
 
 	private static final long serialVersionUID = -3914853933537229529L;
-	protected ArrayList<Client<ISuperPeer>> superPeers;
-	private OPeer observableObject;
-	protected InetAddress localAddress;
+	protected ArrayList<Identity> superPeers;
+	protected OPeer observableObject;
+	protected Identity localIdentity;
 
-	public Peer(InetAddress inetAddresses) throws RemoteException {
+	public Peer(Observer observer, Identity identity) throws RemoteException {
 		super();
 		this.observableObject = new OPeer();
-		this.localAddress = inetAddresses;
-		this.superPeers = new ArrayList<Client<ISuperPeer>>();
+		this.observableObject.addObserver(observer);
+		this.localIdentity = identity;
+		this.superPeers = new ArrayList<Identity>();
 	}
 	
-	public void addObserver(Observer observer) {
-		this.observableObject.addObserver(observer);
-	}
-
 	@Override
-	public void connectTo(InetAddress superPeerAddress) throws RemoteException {
-		System.out.println(superPeerAddress);
+	public void connectTo(Identity superPeerIdentity) throws RemoteException {
 		try {
-			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-			System.out.println(client.getClientHost());
-			((ISuperPeer) client.getRemoteObject()).subscribePeer(localAddress);
-			this.superPeers.add(client);
-			System.out.println("Connexion au super pair : " + superPeerAddress.getHostAddress());
+			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+			((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
+			this.superPeers.add(superPeerIdentity);
+			System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress());
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (ServerNotActiveException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

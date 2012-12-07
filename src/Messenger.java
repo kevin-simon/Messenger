@@ -1,6 +1,7 @@
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -12,17 +13,19 @@ import rmi.interfaces.IPeer;
 import rmi.interfaces.ISuperPeer;
 import rmi.interfaces.Peer;
 import rmi.interfaces.SuperPeer;
+import ui.Window;
 import utils.Discover;
 import utils.OPeer;
+import utils.OWindow;
 import utils.Properties;
 import datas.Identity;
-import datas.Message;
 
 public class Messenger implements Observer {
 	
 	private static Messenger instance;
+	private Window window;
 	private Type peerType;
-	
+	private Identity identity;
 	private Discover discover;
 	private Server server;
 	private HashMap<String, Client<IPeer>> peers;
@@ -49,8 +52,8 @@ public class Messenger implements Observer {
 		discover.start();
 	}
 	
-	public void sendBroadcast(String pseudonyme) {
-		this.discover.sendPacket(pseudonyme, this.peerType);
+	public void sendBroadcast() {
+		this.discover.sendPacket(this.identity.getPseudonyme(), this.peerType);
 	}
 	
 	public void upgrade() {
@@ -64,8 +67,7 @@ public class Messenger implements Observer {
 		this.server = new Server("Messenger", localAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 		if (this.peerType == Type.SUPER_PEER) {
 			try {
-				SuperPeer superPeer = new SuperPeer(localAddress);
-				superPeer.addObserver(this);
+				SuperPeer superPeer = new SuperPeer(this, this.identity);
 				this.server.start(superPeer);
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -73,8 +75,7 @@ public class Messenger implements Observer {
 		}
 		else if (this.peerType == Type.PEER) {
 			try {
-				Peer peer = new Peer(localAddress);
-				peer.addObserver(this);
+				Peer peer = new Peer(this, this.identity);
 				this.server.start(peer);
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -85,19 +86,17 @@ public class Messenger implements Observer {
 	public static void main(String[] args) throws Exception {
 		
 		Messenger messenger = Messenger.getInstance();
-		messenger.startServer();
-		messenger.sendBroadcast("kekekiwi");
-		
-		/*Client<IPeer> client = new Client<IPeer>("Messenger", "192.168.1.15", 2001);
-		IPeer superPeer = (IPeer) client.getRemoteObject();
-		Message message = new Message(new Identity("Kekekiwi", InetAddress.getByName("192.168.1.8"), Type.SUPER_PEER), new Identity("Kekekiwi", InetAddress.getByName("192.168.1.8"), Type.SUPER_PEER), "Pouet !");
-		superPeer.receiveMessage(message);*/
-		
-		//new Window("Messenger");
+		Window window = new Window("Messenger");
+		messenger.setWindow(window);
 	}
 	
 	public Type getPeerType() {
 		return this.peerType;
+	}
+	
+	public void setWindow(Window window) {
+		this.window = window;
+		this.window.addObserver(this);
 	}
 	
 	@Override
@@ -111,8 +110,7 @@ public class Messenger implements Observer {
 					if (!((IPeer) server.getSharedObject()).hasSuperPeers()) {
 						server.stop();
 						this.upgrade();
-						SuperPeer superPeer = new SuperPeer(discover.getLocalAddress());
-						superPeer.addObserver(this);
+						SuperPeer superPeer = new SuperPeer(this, this.identity);
 						server.start(superPeer);
 					}
 				} catch (RemoteException e) {
@@ -125,24 +123,15 @@ public class Messenger implements Observer {
 					if (clientIdentity.getType() == Type.SUPER_PEER) {
 						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.superPeers.put(clientIdentity.getAddress(), client);
-						((ISuperPeer) client.getRemoteObject()).connectTo(discover.getLocalAddress());
+						((ISuperPeer) client.getRemoteObject()).connectTo(this.identity);
 					}
 					else if (clientIdentity.getType() == Type.PEER) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.peers.put(clientIdentity.getAddress(), client);
 						System.out.println(((IPeer) client.getRemoteObject()));
-						((IPeer) client.getRemoteObject()).connectTo(discover.getLocalAddress());
+						((IPeer) client.getRemoteObject()).connectTo(this.identity);
 					}
 					System.out.println("Connexion au pair " + clientIdentity.getAddress() + " via le protocole RMI");
-					Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", "192.168.1.15", 2001);
-					ISuperPeer superPeer = (ISuperPeer) client.getRemoteObject();
-					try {
-						Message message = new Message(new Identity("Kekekiwi", InetAddress.getByName("192.168.1.16"), Type.PEER), new Identity("Marioma", InetAddress.getByName("192.168.1.8"), Type.PEER), "Pouet !");
-						superPeer.tranferMessage(message);
-					} catch (UnknownHostException e) {
-						e.printStackTrace();
-					}
-					
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				} catch (RemoteException e) {
@@ -150,10 +139,24 @@ public class Messenger implements Observer {
 				}
 			}
 		}
-		else if (o instanceof OPeer && object instanceof Message) {
-			Message message = (Message) object;
-			System.out.println("Reception d'un message de la part de " + message.getSender());
-			System.out.println(message.getMessage());
+		else if (o instanceof OPeer) {
+			if (object instanceof ArrayList<?>) {
+				ArrayList<Identity> identities = new ArrayList<Identity>();
+				for (Object unknownObject : (ArrayList<?>) object) {
+					if (unknownObject instanceof Identity) {
+						identities.add((Identity) unknownObject);
+					}
+				}
+				System.out.println(identities);
+			}
+		}
+		else if (o instanceof OWindow) {
+			if (object instanceof String) {
+				String pseudonyme = (String) object;
+				this.identity = new Identity(pseudonyme, this.discover.getLocalAddress(), this.peerType);
+				this.startServer();
+				this.sendBroadcast();
+			}
 		}
 	}
 

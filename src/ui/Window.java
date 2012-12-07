@@ -3,6 +3,7 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Observer;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -11,13 +12,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-import ui.action.*;
+import ui.action.AboutAction;
+import ui.action.ExitAction;
+import ui.action.LoginAction;
+import ui.action.LogoutAction;
+import ui.action.WindowAction;
 import ui.location.Location;
+import utils.OWindow;
 
 public class Window extends JFrame {
 
 	private static final long serialVersionUID = 7446192599263749847L;
 	public static Color defaultColor;
+	public OWindow observableObject;
 	
 	private JPanel main;
 	private ConnectionWindow connectionWindow;
@@ -31,6 +38,7 @@ public class Window extends JFrame {
 
 	public Window(String windowsTitle) {
 		super();
+		this.observableObject = new OWindow();
 		this.setWindowSize("800x600");
 		this.setTitle(windowsTitle);
 		ImageIcon icone = ResourceManager.getImage("icon.png");
@@ -49,11 +57,8 @@ public class Window extends JFrame {
 		this.initializeToolbar();
 		this.setLocationRelativeTo(null);
 		this.setSize(this.width, this.height);
-		//this.loadConnection();
-		this.loadMessenger("moi");
+		this.loadConnection();
 	}
-	
-	
 	
 	public JPanel mainPanel() {
 		return this.main;
@@ -70,6 +75,8 @@ public class Window extends JFrame {
 		mainPanel.setLayout(new BorderLayout());
 		initializeFriendsZone();
 		initializeConversationsZone();
+		this.observableObject.setChanged();
+		this.observableObject.notifyObservers(pseudonyme);
 		this.setVisible(true);
 	}
 	
@@ -136,5 +143,9 @@ public class Window extends JFrame {
 	
 	public void offlineWindow() {
 		JOptionPane.showMessageDialog(this, Location.get("offlineWindow"), "PeerMessenger - " + Location.get("offlineWindowTitle"), JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("about.png"));
+	}
+
+	public void addObserver(Observer observer) {
+		this.observableObject.addObserver(observer);
 	}
 }
