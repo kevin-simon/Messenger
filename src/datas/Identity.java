@@ -35,7 +35,7 @@ public class Identity implements Serializable {
 		return this.type;
 	}
 	
-	/*public String toString() {
+	public String toString() {
 		return this.pseudonyme + "@" + this.address.getHostAddress();
-	}*/
+	}
 }
