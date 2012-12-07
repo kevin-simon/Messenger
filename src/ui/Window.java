@@ -152,6 +152,7 @@ public class Window extends JFrame {
 		this.friendsZone.removeAll();
 		for (Identity identity : identities) {
 			this.friendsZone.addFriend(identity.getIdentity(), FriendStatus.ONLINE);
+			System.out.println(identity);
 		}
 		this.setVisible(true);
 	}

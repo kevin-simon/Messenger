@@ -14,7 +14,7 @@ import datas.Message;
 public class Peer extends UnicastRemoteObject implements IPeer {
 
 	private static final long serialVersionUID = -3914853933537229529L;
-	protected ArrayList<Identity> superPeers;
+	protected Identity superPeer;
 	protected OPeer observableObject;
 	protected Identity localIdentity;
 
@@ -23,7 +23,6 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 		this.observableObject = new OPeer();
 		this.observableObject.addObserver(observer);
 		this.localIdentity = identity;
-		this.superPeers = new ArrayList<Identity>();
 	}
 	
 	@Override
@@ -31,8 +30,11 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 		try {
 			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 			((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
-			this.superPeers.add(superPeerIdentity);
-			System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress());
+			ArrayList<Identity> identities = ((ISuperPeer) client.getRemoteObject()).getOnlinePeers();
+			this.observableObject.setChanged();
+			this.observableObject.notifyObservers(identities);
+			this.superPeer = superPeerIdentity;
+			System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + " effectuee");
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {
@@ -48,7 +50,18 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 
 	@Override
 	public boolean hasSuperPeers() throws RemoteException {
-		return this.superPeers.size() != 0;
+		return this.superPeer != null;
 	}
+
+	@Override
+	public void updateIdentities() throws RemoteException {
+		Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+		ArrayList<Identity> identities = ((ISuperPeer) client.getRemoteObject()).getOnlinePeers();
+		this.observableObject.setChanged();
+		this.observableObject.notifyObservers(identities);
+		
+	}
+	
+	
 
 }

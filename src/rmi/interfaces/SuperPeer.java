@@ -12,7 +12,8 @@ import datas.Message;
 public class SuperPeer extends Peer implements ISuperPeer {
 
 	private static final long serialVersionUID = -906717677759121748L;
-	
+
+	private ArrayList<Identity> superPeers;
 	private ArrayList<Identity> onlinePeers;
 	private ArrayList<Message> transmittedMessages;
 
