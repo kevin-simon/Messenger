@@ -2,6 +2,7 @@ package rmi.interfaces;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Observer;
 
 import rmi.Client;
@@ -50,10 +51,9 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 	}
 
 	@Override
-	public void updateIdentities() throws RemoteException {
-		Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+	public void updateIdentities(ArrayList<Identity> identities) throws RemoteException {
 		this.observableObject.setChanged();
-		this.observableObject.notifyObservers(((ISuperPeer) client.getRemoteObject()).getOnlinePeers());
+		this.observableObject.notifyObservers(identities);
 	}
 	
 	
