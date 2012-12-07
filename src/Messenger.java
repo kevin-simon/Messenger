@@ -140,6 +140,7 @@ public class Messenger implements Observer {
 					}
 				}
 				if (this.peerType == Type.SUPER_PEER) {
+					identities.remove(this.identity);
 					for (Identity identity : identities) {
 						try {
 							Client<IPeer> client = new Client<IPeer>("Messenger", identity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
@@ -151,7 +152,6 @@ public class Messenger implements Observer {
 						}
 					}
 				}
-				identities.remove(this.identity);
 				this.window.updateIdentityList(identities);
 			}
 		}
