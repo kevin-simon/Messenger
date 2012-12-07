@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -34,7 +35,7 @@ public class Discover extends Observable implements Runnable {
 				List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
 				for (InterfaceAddress interfaceAddress : interfaceAddresses) {
 					InetAddress broadcastAddress;
-					if (!interfaceAddress.getAddress().isLoopbackAddress()) {
+					if (!interfaceAddress.getAddress().isLoopbackAddress() && interfaceAddress.getAddress() instanceof Inet4Address) {
 						this.localAddresses.put(networkInterface.getName(), interfaceAddress.getAddress());
 						if ((broadcastAddress = interfaceAddress.getBroadcast()) != null) {
 							this.broadcastAddresses.put(networkInterface.getName(), broadcastAddress);

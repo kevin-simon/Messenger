@@ -143,7 +143,9 @@ public class Messenger implements Observer {
 					else if (clientIdentity.getType() == Type.PEER) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
 						this.peers.put(clientAddress.getHostAddress(), client);
+						System.out.println(client);
 						((IPeer) client.getRemoteObject()).connectTo(((Discover) o).getLocalAddresses());
+						System.out.println(client);
 					}
 					System.out.println("Connexion au pair " + clientAddress.getHostAddress() + " via le protocole RMI");
 					Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", "192.168.1.15", 2001);

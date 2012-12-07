@@ -34,6 +34,7 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 		for (InetAddress superPeerAddress : superPeerAddresses) {
 			try {
 				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerAddress.getHostAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+				System.out.println(client);
 				for (InetAddress localAddress : this.localAddresses) {
 					((ISuperPeer) client.getRemoteObject()).subscribePeer(localAddress);
 				}
