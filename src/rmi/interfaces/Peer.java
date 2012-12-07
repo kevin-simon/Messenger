@@ -51,9 +51,11 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 
 	@Override
 	public void updateIdentities() throws RemoteException {
-		Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-		this.observableObject.setChanged();
-		this.observableObject.notifyObservers(((ISuperPeer) client.getRemoteObject()).getOnlinePeers());
+		if (this.superPeer != null) {
+			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+			this.observableObject.setChanged();
+			this.observableObject.notifyObservers(((ISuperPeer) client.getRemoteObject()).getOnlinePeers());
+		}
 	}
 	
 	
