@@ -139,6 +139,7 @@ public class Messenger implements Observer {
 						identities.add((Identity) unknownObject);
 					}
 				}
+				identities.remove(this.identity);
 				if (this.peerType == Type.SUPER_PEER) {
 					identities.remove(this.identity);
 					for (Identity identity : identities) {
