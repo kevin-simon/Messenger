@@ -162,8 +162,10 @@ public class Window extends JFrame {
 
 	public void updateIdentityList(ArrayList<Identity> identities) {
 		this.friendsZone.removeAll();
-		for (Identity identity : identities) {
-			this.friendsZone.addFriend(identity, FriendStatus.ONLINE);
+		if (identities != null) {
+			for (Identity identity : identities) {
+				this.friendsZone.addFriend(identity, FriendStatus.ONLINE);
+			}
 		}
 		this.setVisible(true);
 	}

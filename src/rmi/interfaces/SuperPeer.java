@@ -1,11 +1,11 @@
 package rmi.interfaces;
 
+import java.net.ConnectException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Observer;
 
 import rmi.Client;
-import utils.Properties;
 import datas.Identity;
 import datas.Message;
 
@@ -36,7 +36,7 @@ public class SuperPeer extends Peer implements ISuperPeer {
 		boolean messageTransmit = false;
 		for (Identity peerIdentity : this.onlinePeers) {
 			if (peerIdentity.getIdentity().equals(message.getReceiver().getIdentity())) {
-				Client<IPeer> client = new Client<IPeer>("Messenger", peerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+				Client<IPeer> client = new Client<IPeer>("Messenger", peerIdentity.getAddress(), peerIdentity.getPort());
 				((IPeer) client.getRemoteObject()).receiveMessage(message);
 				messageTransmit = true;
 				break;
@@ -45,7 +45,7 @@ public class SuperPeer extends Peer implements ISuperPeer {
 		if (!messageTransmit) {
 			this.transmittedMessages.add(message);
 			for (Identity superPeerIdentity : this.superPeers) {
-				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
+				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), superPeerIdentity.getPort());
 				((ISuperPeer) client.getRemoteObject()).tranferMessage(message);
 			}
 			System.out.println("Transfert du message a " + this.superPeers.size() + " super-pairs !");
@@ -66,13 +66,12 @@ public class SuperPeer extends Peer implements ISuperPeer {
 
 	@Override
 	public void disconnect(Identity identity) throws RemoteException {
-		Identity remove = null;
 		for (Identity onlinePeer : this.onlinePeers) {
 			if (onlinePeer.getIdentity().equals(identity.getIdentity())) {
-				remove = onlinePeer;
+				this.onlinePeers.remove(onlinePeer);
+				break;
 			}
 		}
-		this.onlinePeers.remove(remove);
 		this.observableObject.setChanged();
 		this.observableObject.notifyObservers(this.onlinePeers);
 	}

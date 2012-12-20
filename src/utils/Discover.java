@@ -4,11 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Observable;
@@ -21,6 +23,8 @@ public class Discover extends Observable implements Runnable {
 	private InetAddress broadcastAddress;
 	private InetAddress localAddress;
 	private InetAddress broadcastSender;
+	private DatagramSocket socket;
+	private boolean start;
 
 	public Discover() {
 		try {
@@ -55,14 +59,14 @@ public class Discover extends Observable implements Runnable {
 		new Thread(this).start();
 	}
 	
-	public void sendPacket(String pseudonyme, Type peerType) {
+	public void sendPacket(String pseudonyme, Type peerType, int port) {
 		try {
 			int broadcastPort = Integer.parseInt(Properties.APP.get("broadcast_port"));
 			DatagramSocket serverSocket = new DatagramSocket();
 		    serverSocket.setBroadcast(true);
 	    	ByteArrayOutputStream  baos = new ByteArrayOutputStream();
 	        ObjectOutputStream oos = new ObjectOutputStream(baos);
-	        oos.writeObject(new Identity(pseudonyme, this.localAddress, peerType));
+	        oos.writeObject(new Identity(pseudonyme, this.localAddress, peerType, port));
 	        oos.flush();
 	        
 	    	System.out.println("Sending Discovery message to " + broadcastAddress + " Via UDP port " + broadcastPort);
@@ -93,36 +97,47 @@ public class Discover extends Observable implements Runnable {
 	}
 	
 	public void run() {
-		while (true) {
+		do {
 			try {
 				int broadcastPort = Integer.parseInt(Properties.APP.get("broadcast_port"));
 				
-				DatagramSocket socket = new DatagramSocket(broadcastPort);
-				 byte[] data = new byte[4];
+				this.socket = new DatagramSocket(broadcastPort);
+				this.start = true;
+				byte[] data = new byte[4];
 			    DatagramPacket packet = new DatagramPacket(data, data.length );
-			    socket.receive(packet);
-				if (!this.localAddress.getHostAddress().equals(packet.getAddress().getHostAddress())) {
-				    System.out.println("Reception d'un packet broadcaste depuis " + packet.getAddress());
-				    int len = 0;
-				    for (int i = 0; i < 4; ++i) {
-				    	len |= (data[3-i] & 0xff) << (i << 3);
-				    }
-		
-				    byte[] buffer = new byte[len];
-				    packet = new DatagramPacket(buffer, buffer.length );
-				    socket.receive(packet);
-				    this.broadcastSender = packet.getAddress();
-				    ByteArrayInputStream baos = new ByteArrayInputStream(buffer);
-				    ObjectInputStream oos = new ObjectInputStream(baos);
-				    this.setChanged();
-				    this.notifyObservers(oos.readObject());
+			    this.socket.receive(packet);
+				System.out.println("Reception d'un packet broadcaste depuis " + packet.getAddress());
+			    int len = 0;
+			    for (int i = 0; i < 4; ++i) {
+			    	len |= (data[3-i] & 0xff) << (i << 3);
 			    }
-			    socket.close();
-			} catch(Exception ex) {
+	
+			    byte[] buffer = new byte[len];
+			    packet = new DatagramPacket(buffer, buffer.length );
+			    this.socket.receive(packet);
+			    this.broadcastSender = packet.getAddress();
+			    ByteArrayInputStream baos = new ByteArrayInputStream(buffer);
+			    ObjectInputStream oos = new ObjectInputStream(baos);
+			    this.setChanged();
+			    this.notifyObservers(oos.readObject());
+			    this.socket.close();
+			} catch(BindException ex) {
+				System.out.println("Une autre instance écoute déjà sur ce port");
+				System.out.println("Pas de passage en mode écoute");
+				this.start = false;
+			} catch(SocketException ex) {
+				System.out.println("Fermeture de l'écoute");
+				this.start = false;
+			} catch (Exception ex) {
 				ex.printStackTrace();
 				System.exit(1);
 			}
-		}
+		} while (this.start);
     }
-	
+
+	public void stop() {
+		if (this.socket != null) {
+			this.socket.close();
+		}
+	}
 }

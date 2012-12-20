@@ -12,15 +12,17 @@ public class Identity implements Serializable {
 	private String pseudonyme;
 	private InetAddress address;
 	private Type type;
+	private int port;
 	
 	public Identity(Identity identity) {
-		this(identity.getAddress(), identity.getInetAddress(), identity.getType());
+		this(identity.getAddress(), identity.getInetAddress(), identity.getType(), identity.getPort());
 	}
 
-	public Identity(String pseudonyme, InetAddress inetAddress, Type type) {
+	public Identity(String pseudonyme, InetAddress inetAddress, Type type, int port) {
 		this.pseudonyme = pseudonyme;
 		this.address = inetAddress;
 		this.type = type;
+		this.port = port;
 	}
 	
 	public InetAddress getInetAddress() {
@@ -41,6 +43,10 @@ public class Identity implements Serializable {
 	
 	public Type getType() {
 		return this.type;
+	}
+	
+	public int getPort() {
+		return this.port;
 	}
 	
 	public String toString() {

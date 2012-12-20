@@ -48,6 +48,11 @@ public class ConversationsZone extends JTabbedPane {
 
 	public void addTab(Identity friend) {
 		Tab tab = null;
+		for (Identity identity : this.tabList.keySet()) {
+			if (identity.getIdentity().equals(friend.getIdentity())) {
+				friend = identity;
+			}
+		}
 		if (!this.tabList.containsKey(friend)) {
 			tab = new Tab(friend, new ChatPanel(this.window, friend));
 			super.addTab(tab.getIdentity().getIdentity(), tab.getChatPanel());
@@ -63,10 +68,9 @@ public class ConversationsZone extends JTabbedPane {
 		tab.giveFocus();
 	}
 	
-	public void removeTab(String pseudonyme) {
-		Tab tab = this.tabList.get(pseudonyme);
+	public void removeTab(Tab tab) {
 		this.removeTabAt(this.indexOfTabComponent(tab));
-		this.tabList.remove(pseudonyme);
+		this.tabList.remove(tab.getIdentity());
 	}
 	
 }

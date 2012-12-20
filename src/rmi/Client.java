@@ -1,6 +1,7 @@
 package rmi;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -28,6 +29,8 @@ public class Client<T extends Remote> extends UnicastRemoteObject {
 		T remote = null;
 		try {
 			remote = (T) Naming.lookup(this.serverUrl);
+		} catch (ConnectException e) {
+			remote = null;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {

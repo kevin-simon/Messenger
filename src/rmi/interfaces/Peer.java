@@ -7,7 +7,7 @@ import java.util.Observer;
 
 import rmi.Client;
 import utils.OPeer;
-import utils.Properties;
+import utils.Upgrade;
 import datas.Identity;
 import datas.Message;
 
@@ -16,26 +16,31 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 	private static final long serialVersionUID = -3914853933537229529L;
 	protected Identity superPeer;
 	protected OPeer observableObject;
+	protected Upgrade upgradeObject;
 	protected Identity localIdentity;
 
 	public Peer(Observer observer, Identity identity) throws RemoteException {
 		super();
 		this.observableObject = new OPeer();
 		this.observableObject.addObserver(observer);
+		this.upgradeObject = new Upgrade();
+		this.upgradeObject.addObserver(observer);
 		this.localIdentity = identity;
 	}
 	
 	@Override
 	public void connectTo(Identity superPeerIdentity) throws RemoteException {
-		try {
-			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-			((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
-			this.superPeer = superPeerIdentity;
-			System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + " effectuee");
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (RemoteException e) {
-			e.printStackTrace();
+		if (this.superPeer == null || !superPeerIdentity.getIdentity().equals(this.superPeer.getIdentity())) {
+			try {
+				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), superPeerIdentity.getPort());
+				((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
+				this.superPeer = superPeerIdentity;
+				System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + " effectuee");
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -58,16 +63,49 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 
 	@Override
 	public void sendMessage(Message message) throws RemoteException {
-		Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-		((ISuperPeer) client.getRemoteObject()).tranferMessage(message);
+		if (this.superPeer != null) {
+			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), this.superPeer.getPort());
+			ISuperPeer superPeer = ((ISuperPeer) client.getRemoteObject());
+			if (superPeer != null) {
+				superPeer.tranferMessage(message);
+			}
+			else {
+				this.superPeer = null;
+				this.upgradeObject.setChanged();
+				this.upgradeObject.notifyObservers(message);
+			}
+		}
+		else {
+			this.upgradeObject.setChanged();
+			this.upgradeObject.notifyObservers(message);
+		}
 	}
 
 	@Override
 	public void disconnect() throws RemoteException {
 		if (this.superPeer != null) {
-			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), Integer.parseInt(Properties.APP.get("rmi_port")));
-			((ISuperPeer) client.getRemoteObject()).disconnect(this.localIdentity);
+			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", this.superPeer.getAddress(), this.superPeer.getPort());
+			ISuperPeer superPeer = ((ISuperPeer) client.getRemoteObject());
+			if (superPeer != null) {
+				superPeer.disconnect(this.localIdentity);
+			}
+			else {
+				this.superPeer = null;
+				this.upgradeObject.setChanged();
+				this.upgradeObject.notifyObservers(null);
+			}
 		}
+		else {
+			this.upgradeObject.setChanged();
+			this.upgradeObject.notifyObservers(null);
+		}
+	}
+
+	@Override
+	public void upgradePeer(ArrayList<Identity> identities) throws RemoteException {
+		System.out.println("Passage en mode Super-Pair demandé");
+		this.upgradeObject.setChanged();
+		this.upgradeObject.notifyObservers(identities);
 	}
 	
 	

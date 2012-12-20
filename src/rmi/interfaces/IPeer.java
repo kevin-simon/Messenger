@@ -15,4 +15,5 @@ public interface IPeer extends Remote {
 	public void receiveMessage(Message message) throws RemoteException;
 	public void updateIdentities(ArrayList<Identity> identity) throws RemoteException;
 	public void sendMessage(Message message) throws RemoteException;
+	public void upgradePeer(ArrayList<Identity> identity) throws RemoteException;
 }

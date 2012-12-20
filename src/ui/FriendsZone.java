@@ -116,5 +116,6 @@ public class FriendsZone extends JPanel {
 	
 	public void removeAll() {
 		this.friends.removeAll();
+		this.friends.repaint();
 	}
 }
