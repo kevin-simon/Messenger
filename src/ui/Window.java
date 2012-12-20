@@ -3,19 +3,15 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Observer;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.UIManager;
 
 import ui.action.AboutAction;

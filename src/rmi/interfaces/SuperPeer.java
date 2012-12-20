@@ -1,6 +1,5 @@
 package rmi.interfaces;
 
-import java.net.ConnectException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Observer;
