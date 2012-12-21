@@ -120,7 +120,6 @@ public class Messenger implements Observer {
 					}
 					else if (clientIdentity.getType() == Type.PEER) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", clientIdentity.getAddress(), clientIdentity.getPort());
-						System.out.println(client);
 						((IPeer) client.getRemoteObject()).connectTo(this.identity);
 					}
 					System.out.println("Connexion au pair " + clientIdentity.getAddress() + " via le protocole RMI");
