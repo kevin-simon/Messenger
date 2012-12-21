@@ -25,7 +25,7 @@ public class KeepAlive extends Observable implements Runnable, Observer {
 	}
 	
 	public void start() {
-		System.out.println("Démarrage du Keeping-alive");
+		System.out.println("Démarrage du Keeping-alive (" + Properties.APP.get("keepalive_time") + "s)");
 		new Thread(this).start();
 	}
 	
