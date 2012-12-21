@@ -8,6 +8,7 @@ import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.ExportException;
 
 public class Server {
 	
@@ -24,6 +25,9 @@ public class Server {
 	public Server(String name, String host, int port) {
 		try {
 			LocateRegistry.createRegistry(port);
+		} catch (ExportException e) {
+			System.out.println("Impossible de lancer le serveur : port déjà utilisé");
+			System.exit(1);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -43,6 +47,9 @@ public class Server {
 			Naming.rebind(this.getUrl(), object);
 			this.sharedObject = object;
 			this.running = true;
+		} catch (ExportException e) {
+			System.out.println("Impossible de lancer le serveur : port déjà utilisé");
+			System.exit(1);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
