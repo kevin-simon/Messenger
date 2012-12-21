@@ -35,7 +35,7 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), superPeerIdentity.getPort());
 				((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
 				this.superPeer = superPeerIdentity;
-				System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + " effectuee");
+				System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + ":" + superPeerIdentity.getPort() + " effectuee");
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			} catch (RemoteException e) {
