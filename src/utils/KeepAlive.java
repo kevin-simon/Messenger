@@ -46,7 +46,6 @@ public class KeepAlive extends Observable implements Runnable, Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		this.setChanged();
-		System.out.println(arg);
 		this.notifyObservers(arg);
 	}
 

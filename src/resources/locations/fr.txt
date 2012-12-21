@@ -1,11 +1,7 @@
-#Mon November 12 2012
-
 online=En ligne
-
 offline=Hors ligne
 
 loginItem=Se connecter
-
 logoutItem=Se deconnecter
 
 exitWindowItem=Fermer
@@ -17,7 +13,7 @@ offlineWindow=Vous ne pouvez pas envoyer de messages car vous etes hors ligne.
 offlineWindowTitle=Hors ligne !
 
 aboutWindowItem=A propos de Messenger
-aboutWindow=Kévin Simon - Matthieu Lenogue\t\t\t\nMaster 2 Informatique - Parcours ALMA\nFaculté des Sciences et Techniques\nUniversité de Nantes\n\nCopyright ©Décembre 2012\n\n
+aboutWindow=Kï¿½vin Simon - Matthieu Lenogue\t\t\t\nMaster 2 Informatique - Parcours ALMA\nFacultï¿½ des Sciences et Techniques\nUniversitï¿½ de Nantes\n\nCopyright ï¿½Dï¿½cembre 2012\n\n
 aboutUrlWindow=http://www.ks-labs.fr
 aboutWindowTitle=A propos de Messenger
 

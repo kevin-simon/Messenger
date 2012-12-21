@@ -1,11 +1,7 @@
-#Mon November 12 2012
-
 online=Online
-
 offline=Offline
 
 loginItem=Login
-
 logoutItem=Logout
 
 exitWindowItem=Fermer
@@ -27,4 +23,3 @@ subscribeTitle=Need account ?
 connectionTitle=Having account ?
 subscribeButton=Subscribe
 connectionButton=Login
-
