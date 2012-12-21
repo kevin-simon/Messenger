@@ -59,6 +59,7 @@ public class Messenger implements Observer {
 			this.server = new Server("Messenger", this.identity.getAddress(), this.identity.getPort());
 		} catch (ExportException e) {
 			this.window.errorStartServer();
+			System.out.println("Fermeture de l'application !");
 			System.exit(1);
 		}
 		if (this.peerType == Type.SUPER_PEER) {
