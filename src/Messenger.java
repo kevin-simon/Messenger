@@ -1,5 +1,6 @@
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
+import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -54,7 +55,11 @@ public class Messenger implements Observer {
 	}
 	
 	public void startServer() {
-		this.server = new Server("Messenger", this.identity.getAddress(), this.identity.getPort());
+		try {
+			this.server = new Server("Messenger", this.identity.getAddress(), this.identity.getPort());
+		} catch (ExportException e) {
+			this.window.errorStartServer();
+		}
 		if (this.peerType == Type.SUPER_PEER) {
 			try {
 				SuperPeer superPeer = new SuperPeer(this, this.identity);

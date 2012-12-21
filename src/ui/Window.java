@@ -174,15 +174,15 @@ public class Window extends JFrame {
 	}
 	
 	public void receiveMessage(Message message) {
-
-		System.out.println("sender : " + message.getSender());
-		System.out.println("receiver : " + message.getReceiver());
-		System.out.println("message : " + message.getMessage());
 		this.conversationsZone.getTab(message.getSender()).getChatPanel().showMessage(message);
 	}
 	
 	public void closeApplication() {
 		this.observableObject.setChanged();
 		this.observableObject.notifyObservers(null);
+	}
+
+	public void errorStartServer() {
+		JOptionPane.showMessageDialog(this, Location.get("errorServerWindow"), "Messenger - " + Location.get("errorServerWindowTitle"), JOptionPane.INFORMATION_MESSAGE, ResourceManager.getImage("about.png"));
 	}
 }

@@ -18,16 +18,13 @@ public class Server {
 	private boolean running;
 	private Remote sharedObject;
 
-	public Server(String name, int port) throws UnknownHostException {
+	public Server(String name, int port) throws UnknownHostException, ExportException {
 		this(name, InetAddress.getLocalHost().getHostAddress(), port);
 	}
 	
-	public Server(String name, String host, int port) {
+	public Server(String name, String host, int port) throws ExportException {
 		try {
 			LocateRegistry.createRegistry(port);
-		} catch (ExportException e) {
-			System.out.println("Impossible de lancer le serveur : port déjà utilisé");
-			System.exit(1);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}

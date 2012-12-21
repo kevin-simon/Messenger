@@ -9,13 +9,17 @@ exitWindowItem=Fermer
 offlineWindow=You can't send any messages because your are offline.
 offlineWindowTitle=Offline !
 
+errorServerWindow=Error : RMI port is already in use.
+errorServerWindowTitle=Error !
+
 closeWindowItem=Quit
 closeWindow=Do you want really close Messenger ?
 closeWindowTitle=Close ?
 
-aboutWindowItem=About
-aboutWindow=Informations !!!!
-aboutWindowTitle=About
+aboutWindowItem=A propos de Messenger
+aboutWindow=Kévin Simon - Matthieu Lenogue\t\t\t\nMaster 2 Informatique - Parcours ALMA\nFaculté des Sciences et Techniques\nUniversité de Nantes\n\nCopyright © December 2012\n\n
+aboutUrlWindow=http://www.ks-labs.fr
+aboutWindowTitle=A propos de Messenger
 
 pseudonymeLabel=Pseudonyme
 passwordLabel=Password

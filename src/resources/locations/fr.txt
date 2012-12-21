@@ -9,11 +9,14 @@ exitWindowItem=Fermer
 closeWindow=Voulez vous vraiment quitter Messenger ?
 closeWindowTitle=Quitter ?
 
+errorServerWindow=Erreur : Le port RMI est déjà utiisé.
+errorServerWindowTitle=Erreur !
+
 offlineWindow=Vous ne pouvez pas envoyer de messages car vous etes hors ligne.
 offlineWindowTitle=Hors ligne !
 
 aboutWindowItem=A propos de Messenger
-aboutWindow=K�vin Simon - Matthieu Lenogue\t\t\t\nMaster 2 Informatique - Parcours ALMA\nFacult� des Sciences et Techniques\nUniversit� de Nantes\n\nCopyright �D�cembre 2012\n\n
+aboutWindow=Kévin Simon - Matthieu Lenogue\t\t\t\nMaster 2 Informatique - Parcours ALMA\nFaculté des Sciences et Techniques\nUniversité de Nantes\n\nCopyright © Décembre 2012\n\n
 aboutUrlWindow=http://www.ks-labs.fr
 aboutWindowTitle=A propos de Messenger
 
