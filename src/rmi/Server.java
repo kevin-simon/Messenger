@@ -25,6 +25,8 @@ public class Server {
 	public Server(String name, String host, int port) throws ExportException {
 		try {
 			LocateRegistry.createRegistry(port);
+		} catch (ExportException e) {
+			throw new ExportException(e.getMessage());
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}

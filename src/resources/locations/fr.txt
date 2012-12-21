@@ -9,7 +9,7 @@ exitWindowItem=Fermer
 closeWindow=Voulez vous vraiment quitter Messenger ?
 closeWindowTitle=Quitter ?
 
-errorServerWindow=Erreur : Le port RMI est déjà utiisé.
+errorServerWindow=Erreur : Le port RMI est déjà utilisé.\nL'application va fermer.
 errorServerWindowTitle=Erreur !
 
 offlineWindow=Vous ne pouvez pas envoyer de messages car vous etes hors ligne.
