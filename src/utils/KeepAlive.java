@@ -29,9 +29,14 @@ public class KeepAlive extends Observable implements Runnable, Observer {
 		new Thread(this).start();
 	}
 	
+	public void stop() {
+		this.discover.stop();
+	}
+	
 	@Override
 	public void run() {
 		while (true) {
+			this.discover.start();
 			this.sendBroadcast();
 			try {
 				Thread.sleep(Integer.parseInt(Properties.APP.get("keepalive_time")) * 1000);

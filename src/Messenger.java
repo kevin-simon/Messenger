@@ -99,13 +99,21 @@ public class Messenger implements Observer {
 	public void update(Observable o, Object object) {
 		if (o instanceof KeepAlive && object instanceof Identity) {
 			Identity clientIdentity = ((Identity) object);
+			System.out.println(this.identity + " : " + this.peerType);
+			System.out.println(clientIdentity + " : " + clientIdentity.getType());
 			if (clientIdentity.getType() == Type.PEER && this.peerType == Type.PEER && clientIdentity.getPort() != this.identity.getPort()) {	
-					try {
-					if (!((IPeer) this.server.getSharedObject()).hasSuperPeers()) {
+				try {
+					IPeer localServer = (IPeer) this.server.getSharedObject();
+					ISuperPeer superPeer = null;
+					if (localServer.hasSuperPeers()) {
+						Identity superPeerIdentity = localServer.getSuperPeerIdentity();
+						Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), superPeerIdentity.getPort());
+						superPeer = client.getRemoteObject();
+					}
+					if (superPeer == null) {
 						this.server.stop();
 						this.upgrade();
-						SuperPeer superPeer = new SuperPeer(this, this.identity);
-						this.server.start(superPeer);
+						this.server.start(new SuperPeer(this, this.identity));
 					}
 				} catch (RemoteException e) {
 					e.printStackTrace();
@@ -184,6 +192,7 @@ public class Messenger implements Observer {
 					this.upgrade();
 					SuperPeer superPeer = new SuperPeer(this, this.identity);
 					this.server.start(superPeer);
+					this.keepAlive = new KeepAlive(this, this.identity.getPseudonyme(), this.peerType);
 					this.window.updateIdentityList(null);
 					for (Identity identity : identities) {
 						Client<IPeer> client = new Client<IPeer>("Messenger", identity.getAddress(), identity.getPort());
@@ -218,6 +227,7 @@ public class Messenger implements Observer {
 				} 
 			}
 			else if (object == null) {
+				this.keepAlive.stop();
 				this.closeApplication();
 			}
 		}

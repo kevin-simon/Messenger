@@ -36,8 +36,16 @@ public class SuperPeer extends Peer implements ISuperPeer {
 		for (Identity peerIdentity : this.onlinePeers) {
 			if (peerIdentity.getIdentity().equals(message.getReceiver().getIdentity())) {
 				Client<IPeer> client = new Client<IPeer>("Messenger", peerIdentity.getAddress(), peerIdentity.getPort());
-				((IPeer) client.getRemoteObject()).receiveMessage(message);
-				messageTransmit = true;
+				IPeer remoteClient = (IPeer) client.getRemoteObject();
+				if (remoteClient != null) {
+					remoteClient.receiveMessage(message);
+					messageTransmit = true;
+				}
+				else {
+					this.disconnect(peerIdentity);
+					this.upgradeObject.setChanged();
+					this.upgradeObject.notifyObservers(message);
+				}
 				break;
 			}
 		}

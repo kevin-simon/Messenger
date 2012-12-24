@@ -30,17 +30,18 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 	
 	@Override
 	public void connectTo(Identity superPeerIdentity) throws RemoteException {
-		if (this.superPeer == null || !superPeerIdentity.getIdentity().equals(this.superPeer.getIdentity())) {
-			try {
-				Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), superPeerIdentity.getPort());
-				((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
-				this.superPeer = superPeerIdentity;
-				System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + ":" + superPeerIdentity.getPort() + " effectuee");
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+		if (this.superPeer != null) {
+			this.disconnect();
+		}
+		try {
+			Client<ISuperPeer> client = new Client<ISuperPeer>("Messenger", superPeerIdentity.getAddress(), superPeerIdentity.getPort());
+			((ISuperPeer) client.getRemoteObject()).subscribePeer(localIdentity);
+			this.superPeer = superPeerIdentity;
+			System.out.println("Connexion au super pair : " + superPeerIdentity.getAddress() + ":" + superPeerIdentity.getPort() + " effectuee");
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -106,6 +107,11 @@ public class Peer extends UnicastRemoteObject implements IPeer {
 		System.out.println("Passage en mode Super-Pair demandé");
 		this.upgradeObject.setChanged();
 		this.upgradeObject.notifyObservers(identities);
+	}
+
+	@Override
+	public Identity getSuperPeerIdentity() throws RemoteException {
+		return this.superPeer;
 	}
 	
 	
